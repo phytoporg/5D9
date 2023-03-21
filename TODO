@@ -1,8 +1,9 @@
 - Bring up exclusive window
+* Load configuration file?
+** --config param for config path pointing to assets, shaders, etc.
 * Draw basic textured quads from assets dir
 * Initialize hot-loadable carousel implementation
 * Render static carousel
-* Load configuration file
 * Keyboard navigation
 * Controller navigation
 * Integration with process management solution
