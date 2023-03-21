@@ -20,12 +20,19 @@ int main(int argc, char** argv)
         });
     window.SetUserPointer(&window);
 
-    while (true)
+    bool looping = true;
+    while (looping)
     {
-        const Window::EventType EventType = window.PollEvents();
-        if (EventType == Window::EventType::Quit)
+        Window::EventType eventType = window.PollEvents();
+        while (eventType != Window::EventType::None)
         {
-            break;
+            if (eventType == Window::EventType::Quit)
+            {
+                looping = false;
+                break;
+            }
+
+            eventType = window.PollEvents();
         }
 
         window.Clear(ColorRGB::WHITE);

@@ -10,4 +10,5 @@ add_executable(${TARGETNAME} ${SOURCES})
 
 target_link_libraries(${TARGETNAME}
     countdownlib
+    ${OPENGL_LIBRARIES}
     ${SDL2_LIBRARIES})

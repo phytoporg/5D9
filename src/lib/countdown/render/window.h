@@ -15,7 +15,8 @@ namespace countdown { namespace render {
     public:
         enum class EventType
         {
-            Invalid = 0,
+            None = 0,
+            Invalid,
             KeyDown,
             KeyUp,
             Quit

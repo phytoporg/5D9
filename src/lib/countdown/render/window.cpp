@@ -1,5 +1,6 @@
 #include "window.h"
 #include "color.h"
+#include "rendercommon.h"
 #include <countdown/log/log.h>
 #include <countdown/log/check.h>
 
@@ -41,17 +42,9 @@ Window::Window(const char* pWindowName, uint32_t width, uint32_t height)
 {
     RELEASE_CHECK(pWindowName != nullptr, "Window requires a name");
 
-    if (!SDL_WasInit(SDL_INIT_VIDEO))
-    {
-        // Initialize video subsystem if it's not already initialized
-        if (SDL_Init(SDL_INIT_VIDEO) < 0)
-        {
-            RELEASE_LOGLINE_FATAL(
-                LOG_RENDER,
-                "Window %s failed to initialize SDL video subsystem",
-                pWindowName);
-        }
-    }
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
     m_pWindow = SDL_CreateWindow(
             pWindowName,
@@ -63,6 +56,19 @@ Window::Window(const char* pWindowName, uint32_t width, uint32_t height)
     RELEASE_CHECK(
         m_pWindow != nullptr,
         "Failed to create SDL window %s: %s", pWindowName, SDL_GetError());
+
+    SDL_GLContext context = SDL_GL_CreateContext(m_pWindow);
+    if (SDL_GL_MakeCurrent(m_pWindow, context) < 0)
+    {
+        RELEASE_LOG_FATAL(LOG_RENDER, "Failed to set current GL context: %s", SDL_GetError());
+    }
+
+    if (SDL_GL_SetSwapInterval(1) < 0)
+    {
+        RELEASE_LOG_FATAL(LOG_RENDER, "Failed to set swap interval: %s", SDL_GetError());
+    }
+
+    glViewport(1.0f, 0.0f, 1.0f, 0.0f);
 }
 
 Window::~Window()
@@ -97,21 +103,18 @@ Window::EventType Window::PollEvents() const
         return EventType;
     }
 
-    return Window::EventType::Invalid;
+    return Window::EventType::None;
 }
 
 void Window::Clear(const ColorRGB& clearColor) const
 {
-    SDL_Surface* pScreenSurface = SDL_GetWindowSurface(m_pWindow);
-    SDL_FillRect(
-        pScreenSurface,
-        nullptr,
-        SDL_MapRGB(pScreenSurface->format, clearColor.R, clearColor.G, clearColor.B));
+    glClearColor(clearColor.R / 255.0f, clearColor.G / 255.0f, clearColor.B / 255.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void Window::Update() const
 {
-    SDL_UpdateWindowSurface(m_pWindow);
+    SDL_GL_SwapWindow(m_pWindow);
 }
 
 void Window::Quit() const
