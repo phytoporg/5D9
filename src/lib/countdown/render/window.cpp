@@ -16,8 +16,23 @@ namespace
         {
             case SDL_QUIT:
                 return Window::EventType::Quit;
+            case SDL_KEYDOWN:
+                return Window::EventType::KeyDown;
+            case SDL_KEYUP:
+                return Window::EventType::KeyUp;
             default:
                 return Window::EventType::Invalid;
+        }
+    }
+
+    Window::KeyType SDLKeySymToKeyType(SDL_Keycode sdlKeyType)
+    {
+        switch (sdlKeyType)
+        {
+            case SDLK_q:
+                return Window::KeyType::Q;
+            default:
+                return Window::KeyType::Invalid;
         }
     }
 }
@@ -64,7 +79,22 @@ Window::EventType Window::PollEvents() const
     SDL_Event e;
     if (SDL_PollEvent(&e))
     {
-        return SDLToCountdownEvent(e.type);
+        const Window::EventType EventType = SDLToCountdownEvent(e.type);
+        switch (EventType)
+        {
+            case Window::EventType::KeyUp:
+                // Fallthrough
+            case Window::EventType::KeyDown:
+                if (m_pfnKeyStateChanged)
+                {
+                    m_pfnKeyStateChanged(
+                        EventType,
+                        SDLKeySymToKeyType(e.key.keysym.sym),
+                        m_pUserPointer);
+                }
+        }
+
+        return EventType;
     }
 
     return Window::EventType::Invalid;
@@ -73,10 +103,30 @@ Window::EventType Window::PollEvents() const
 void Window::Clear(const ColorRGB& clearColor) const
 {
     SDL_Surface* pScreenSurface = SDL_GetWindowSurface(m_pWindow);
-    SDL_FillRect(pScreenSurface, nullptr, SDL_MapRGB(pScreenSurface->format, clearColor.R, clearColor.G, clearColor.B));
+    SDL_FillRect(
+        pScreenSurface,
+        nullptr,
+        SDL_MapRGB(pScreenSurface->format, clearColor.R, clearColor.G, clearColor.B));
 }
 
 void Window::Update() const
 {
     SDL_UpdateWindowSurface(m_pWindow);
+}
+
+void Window::Quit() const
+{
+    SDL_Event quitEvent;
+    quitEvent.type = SDL_QUIT;
+    SDL_PushEvent(&quitEvent);
+}
+
+void Window::SetKeyStateChangedHandler(FnKeyStateChangedHandler pfnHandler)
+{
+    m_pfnKeyStateChanged = pfnHandler;
+}
+
+void Window::SetUserPointer(void* pUserPointer)
+{
+    m_pUserPointer = pUserPointer;
 }
