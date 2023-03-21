@@ -1,5 +1,5 @@
-* Bring up exclusive window
-* Load configuration
+- Bring up exclusive window
+* Load configuration file
 * Initialize hot-loadable carousel implementation
 * Render static carousel
 * Keyboard navigation

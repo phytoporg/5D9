@@ -59,7 +59,7 @@ Window::Window(const char* pWindowName, uint32_t width, uint32_t height)
             SDL_WINDOWPOS_UNDEFINED,
             width,
             height,
-            SDL_WINDOW_SHOWN);
+            SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
     RELEASE_CHECK(
         m_pWindow != nullptr,
         "Failed to create SDL window %s: %s", pWindowName, SDL_GetError());
