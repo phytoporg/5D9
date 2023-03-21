@@ -1,6 +1,7 @@
 #pragma once
 
 #include "selectable.h"
+#include <string>
 #include <cstdint>
 
 namespace countdown 
@@ -11,16 +12,23 @@ namespace countdown
     }
 }
 
+class AppConfig;
 class CountdownApp
 {
     public:
-        CountdownApp(countdown::render::Window* pWindow);
+        CountdownApp(countdown::render::Window* pWindow, const AppConfig& configuration);
+
+        bool Initialize();
 
         void Tick(float dtSeconds);
         void Draw();
 
     private:
+        bool LoadShadersFromPath(const std::string& shadersPath);
+
+    private:
         countdown::render::Window* m_pWindow = nullptr;
+        bool                       m_isInitialized = false;
 
         // TODO: factor app state into common structure
         // TODO: static array container
