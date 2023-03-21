@@ -1,8 +1,11 @@
 - Bring up exclusive window
-* Load configuration file
+* Draw basic textured quads from assets dir
 * Initialize hot-loadable carousel implementation
 * Render static carousel
+* Load configuration file
 * Keyboard navigation
 * Controller navigation
 * Integration with process management solution
 * Freetype font rendering
+* Animations and presentation
+* Audio support
