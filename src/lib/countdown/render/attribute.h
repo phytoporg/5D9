@@ -1,5 +1,8 @@
 #pragma once
 
+#include "rendercommon.h"
+
+#include <cstdint>
 #include <vector>
 
 namespace countdown { namespace render { 

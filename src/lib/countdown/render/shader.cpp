@@ -1,4 +1,5 @@
 #include "shader.h"
+#include "rendercommon.h"
 
 #include <algorithm>
 #include <cassert>

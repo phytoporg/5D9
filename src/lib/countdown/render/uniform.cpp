@@ -1,6 +1,7 @@
 #include "uniform.h"
+#include "rendercommon.h"
 
-#include <countdown/system/system.h>
+#include <countdown/log/log.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -36,7 +37,7 @@ void countdown::render::SetUniformByType(uint32_t slot, UniformType type, void c
             Uniform<glm::mat4>::Set(slot, *static_cast<const glm::mat4*>(pValue));
             break;
         default:
-            countdown::system::LogAndFail("Unexpected uniform type!");
+            RELEASE_LOGLINE_FATAL(LOG_RENDER, "Unexpected uniform type!");
     }
 }
 
