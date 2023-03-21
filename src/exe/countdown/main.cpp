@@ -1,3 +1,4 @@
+#include "countdownapp.h"
 #include <countdown/render/window.h>
 #include <countdown/render/color.h>
 
@@ -20,6 +21,8 @@ int main(int argc, char** argv)
         });
     window.SetUserPointer(&window);
 
+    CountdownApp app(&window);
+
     bool looping = true;
     while (looping)
     {
@@ -35,7 +38,12 @@ int main(int argc, char** argv)
             eventType = window.PollEvents();
         }
 
+        // TODO: proper outer loop with dt bookkeeping
+        const float dtSeconds = 0.f;
+        app.Tick(dtSeconds);
+
         window.Clear(ColorRGB::WHITE);
+        app.Draw();
         window.Update();
     }
 }
