@@ -4,6 +4,8 @@
 #include <cstdarg>
 #include <cstdlib>
 
+#include <stdexcept>
+
 using namespace countdown;
 using namespace countdown::log;
 
@@ -114,9 +116,7 @@ void countdown::log::LogAndFail(LogZone zone, const char* pFormatString, ...)
 
     fprintf(s_pFile, "%s: %s", ZoneToString(zone), formatted);
 
-    // Force a crash, dereference a null pointer (don't want to rely on exceptions)
-    int* nullPointer = nullptr;
-    *nullPointer = 0xDEADBEEF;
+    throw std::exception();
 }
 
 void countdown::log::LogLineAndFail(LogZone zone, const char* pFormatString, ...)
@@ -131,7 +131,5 @@ void countdown::log::LogLineAndFail(LogZone zone, const char* pFormatString, ...
 
     fprintf(s_pFile, "%s: %s\n", ZoneToString(zone), formatted);
 
-    // Force a crash, dereference a null pointer (don't want to rely on exceptions)
-    int* nullPointer = nullptr;
-    *nullPointer = 0xDEADBEEF;
+    throw std::exception();
 }
