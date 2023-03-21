@@ -1,0 +1,8 @@
+* Bring up exclusive window
+* Load configuration
+* Initialize hot-loadable carousel implementation
+* Render static carousel
+* Keyboard navigation
+* Controller navigation
+* Integration with process management solution
+* Freetype font rendering
