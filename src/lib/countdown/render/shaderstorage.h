@@ -1,3 +1,7 @@
+// shaderstorage.h
+//
+// Entity for compiling and linking shader programs, then storing them for later use.
+
 #pragma once
 
 #include "shader.h"

@@ -1,3 +1,7 @@
+// check.h
+//
+// Basically a "release assert" 
+
 #pragma once
 
 #include "log.h"

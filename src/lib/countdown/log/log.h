@@ -1,3 +1,10 @@
+// log.h
+//
+// Logging functions and helper macros. Filtering has two dimensions: verbosity and
+// zones. The former parameterizes the level of detail of logging which is enabled,
+// the latter groups information emitted via logs into functional zones. Feel free
+// to tack on additional zones as-needed.
+
 #pragma once
 
 #include <cstdint>

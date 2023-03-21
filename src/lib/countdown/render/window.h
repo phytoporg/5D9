@@ -1,10 +1,11 @@
+// window.h
+//
 // Basic window class, wraps SDL bootstrapping
 
 #pragma once
 
 #include <cstdint>
 
-// Forward declarations
 struct SDL_Window;
 
 namespace countdown { namespace render {

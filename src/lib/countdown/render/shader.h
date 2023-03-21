@@ -1,3 +1,7 @@
+// shader.h
+//
+// General purpose shader class and its helper types.
+
 #pragma once
 
 #include <vector>
