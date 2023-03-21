@@ -1,9 +1,13 @@
 #include "countdownapp.h"
 #include <countdown/render/window.h>
 #include <countdown/render/color.h>
+#include <countdown/system/time.h>
 
 using namespace countdown;
 using namespace countdown::render;
+using namespace countdown::system;
+
+constexpr uint32_t kTicksPerFrame = 1000 / 60; // 60 FPS
 
 int main(int argc, char** argv)
 {
@@ -23,6 +27,7 @@ int main(int argc, char** argv)
 
     CountdownApp app(&window);
 
+    uint32_t lastFrameMs = time::GetTicksMs();
     bool looping = true;
     while (looping)
     {
@@ -38,9 +43,17 @@ int main(int argc, char** argv)
             eventType = window.PollEvents();
         }
 
-        // TODO: proper outer loop with dt bookkeeping
-        const float dtSeconds = 0.f;
+        const uint32_t nowMs = time::GetTicksMs();
+        const uint32_t dtTicks = nowMs - lastFrameMs;
+        const float dtSeconds = nowMs / 1000.f;
         app.Tick(dtSeconds);
+        lastFrameMs = nowMs;
+
+        if (dtTicks < kTicksPerFrame)
+        {
+            time::SleepMs(kTicksPerFrame - dtTicks);
+        }
+        
 
         window.Clear(ColorRGB::WHITE);
         app.Draw();

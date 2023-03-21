@@ -6,5 +6,6 @@ include_directories(
 
 file(GLOB SOURCES 
     log/*.cpp
-    render/*.cpp)
+    render/*.cpp
+    system/*.cpp)
 add_library(countdownlib ${SOURCES})
