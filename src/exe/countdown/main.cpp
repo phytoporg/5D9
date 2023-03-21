@@ -1,4 +1,5 @@
 #include <countdown/render/window.h>
+#include <countdown/render/color.h>
 
 using namespace countdown;
 using namespace countdown::render;
@@ -9,6 +10,7 @@ int main(int argc, char** argv)
 
     while (window.PollEvents() != Window::EventType::Quit)
     {
-        // Do something interesting?
+        window.Clear(ColorRGB::WHITE);
+        window.Update();
     }
 }

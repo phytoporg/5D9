@@ -8,6 +8,8 @@
 struct SDL_Window;
 
 namespace countdown { namespace render {
+    struct ColorRGB;
+
     class Window
     {
     public:
@@ -26,6 +28,8 @@ namespace countdown { namespace render {
         ~Window();
 
         EventType PollEvents() const;
+        void Clear(const ColorRGB& clearColor) const;
+        void Update() const;
 
     private:
         SDL_Window* m_pWindow = nullptr;

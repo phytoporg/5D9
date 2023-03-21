@@ -1,4 +1,5 @@
 #include "window.h"
+#include "color.h"
 #include <countdown/log/log.h>
 #include <countdown/log/check.h>
 
@@ -67,4 +68,15 @@ Window::EventType Window::PollEvents() const
     }
 
     return Window::EventType::Invalid;
+}
+
+void Window::Clear(const ColorRGB& clearColor) const
+{
+    SDL_Surface* pScreenSurface = SDL_GetWindowSurface(m_pWindow);
+    SDL_FillRect(pScreenSurface, nullptr, SDL_MapRGB(pScreenSurface->format, clearColor.R, clearColor.G, clearColor.B));
+}
+
+void Window::Update() const
+{
+    SDL_UpdateWindowSurface(m_pWindow);
 }
