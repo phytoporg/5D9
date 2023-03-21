@@ -5,6 +5,7 @@ include_directories(
     ${SDL2_INCLUDE_DIRS})
 
 file(GLOB SOURCES 
+    cli/*.cpp
     log/*.cpp
     render/*.cpp
     system/*.cpp)
