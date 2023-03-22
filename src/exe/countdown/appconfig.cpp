@@ -20,19 +20,27 @@ bool AppConfig::Parse(const std::string& configPath)
     }
 
     json configData = json::parse(in);
-    if (configData.contains("textures_path"))
-    {
-        m_texturesPath = configData["textures_path"].get<std::string>();
-    }
-    else
+    if (!configData.contains("textures_path"))
     {
         RELEASE_LOG_ERROR(
             LOG_DEFAULT,
             "Configuration file %s is missing required key: 'textures_path'",
             m_texturesPath);
+            return false;
     }
+    m_texturesPath = configData["textures_path"].get<std::string>();
 
-    // m_shadersPath = configData["shaders_path"].get<std::string>();
+    if (!configData.contains("shaders_path"))
+    {
+        RELEASE_LOG_ERROR(
+            LOG_DEFAULT,
+            "Configuration file %s is missing required key: 'shaders_path'",
+            m_shadersPath);
+            return false;
+    }
+    m_shadersPath = configData["shaders_path"].get<std::string>();
+
+    // TODO:
     // const std::string GamesDbPath = configData["gamesdb_path"].get<std::string>();
 
     m_parsed = true;
