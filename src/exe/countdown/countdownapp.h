@@ -4,6 +4,8 @@
 #include <string>
 #include <cstdint>
 
+#include <countdown/render/texturestorage.h>
+
 namespace countdown 
 {
     namespace render 
@@ -16,19 +18,20 @@ class AppConfig;
 class CountdownApp
 {
     public:
-        CountdownApp(countdown::render::Window* pWindow, const AppConfig& configuration);
-
-        bool Initialize();
+        bool Initialize(const AppConfig& configuration);
+        void SetWindow(countdown::render::Window* pWindow);
 
         void Tick(float dtSeconds);
         void Draw();
 
     private:
+        bool LoadTexturesFromPath(const std::string& texturesPath);
         bool LoadShadersFromPath(const std::string& shadersPath);
 
     private:
-        countdown::render::Window* m_pWindow = nullptr;
         bool                       m_isInitialized = false;
+        countdown::render::Window* m_pWindow = nullptr;
+        countdown::render::TextureStorage m_textureStorage;
 
         // TODO: factor app state into common structure
         // TODO: static array container

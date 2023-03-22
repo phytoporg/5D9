@@ -11,5 +11,6 @@ include(${PROJECT_SOURCE_DIR}/external/SDL.cmake)
 include(${PROJECT_SOURCE_DIR}/external/SDLImage.cmake)
 include(${PROJECT_SOURCE_DIR}/external/GLM.cmake)
 include(${PROJECT_SOURCE_DIR}/external/OpenGL.cmake)
+include(${PROJECT_SOURCE_DIR}/external/GLEW.cmake)
 
 add_subdirectory(src)

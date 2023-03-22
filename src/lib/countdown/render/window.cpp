@@ -52,7 +52,7 @@ Window::Window(const char* pWindowName, uint32_t width, uint32_t height)
             SDL_WINDOWPOS_UNDEFINED,
             width,
             height,
-            SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
+            SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL /* | SDL_WINDOW_FULLSCREEN */); // Disable full screen for the moment
     RELEASE_CHECK(
         m_pWindow != nullptr,
         "Failed to create SDL window %s: %s", pWindowName, SDL_GetError());
@@ -66,6 +66,11 @@ Window::Window(const char* pWindowName, uint32_t width, uint32_t height)
     if (SDL_GL_SetSwapInterval(1) < 0)
     {
         RELEASE_LOG_FATAL(LOG_RENDER, "Failed to set swap interval: %s", SDL_GetError());
+    }
+
+    if (glewInit() != GLEW_OK)
+    {
+        RELEASE_LOG_FATAL(LOG_RENDER, "Failed to initialize GLEW");
     }
 
     glViewport(1.0f, 0.0f, 1.0f, 0.0f);

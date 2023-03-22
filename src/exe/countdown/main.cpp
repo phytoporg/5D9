@@ -46,11 +46,14 @@ int main(int argc, char** argv)
         });
     window.SetUserPointer(&window);
 
-    // TODO: initialize with reference to window after loading all necessary assets
-    // - Shaders
-    // - Textures
-    // - Selectables
-    CountdownApp app(&window, appConfig);
+    // boo, gross
+    CountdownApp app;
+    app.SetWindow(&window);
+    if (!app.Initialize(appConfig))
+    {
+        RELEASE_LOG_ERROR(LOG_DEFAULT, "Failed to initialize app");
+        return -1;
+    }
 
     uint32_t lastFrameMs = time::GetTicksMs();
     bool looping = true;

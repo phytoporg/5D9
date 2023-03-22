@@ -9,8 +9,10 @@ class AppConfig
 
         bool GetIsParsed() const;
         const std::string& GetShadersPath() const;
+        const std::string& GetTexturesPath() const;
 
     private:
         bool m_parsed = false;
         std::string m_shadersPath;
+        std::string m_texturesPath;
 };
