@@ -16,6 +16,11 @@ constexpr uint32_t kTicksPerFrame = 1000 / 60; // 60 FPS
 
 int main(int argc, char** argv)
 {
+    // Initialize logging
+    log::SetLogVerbosity(log::LogVerbosity::Warning);
+    log::EnableZone(LOG_DEFAULT);
+    log::EnableZone(LOG_RENDER);
+
     cli::CommandLineArgumentParser argumentParser(argc, argv);
     const cli::CommandLineArgument* pConfigPathArgument = argumentParser.FindArgument("config");
     if (!pConfigPathArgument)
