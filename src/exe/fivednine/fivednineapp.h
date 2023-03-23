@@ -1,6 +1,6 @@
 #pragma once
 
-#include "selectable.h"
+#include "gameinfo.h"
 
 // ****
 #include "gamecard.h" // TODO: forward decl?
@@ -36,6 +36,7 @@ class fivednineApp
     private:
         bool LoadTextures(const AppConfig& configuration);
         bool LoadShaders(const AppConfig& configuration);
+        bool LoadGamesInfo(const AppConfig& configuration);
 
     private:
         bool                       m_isInitialized = false;
@@ -50,8 +51,8 @@ class fivednineApp
 
         // TODO: factor app state into common structure
         // TODO: static array container
-        static constexpr uint8_t kMaxSelectableEntries = 255; 
-        Selectable m_selectables[kMaxSelectableEntries];
-        uint8_t m_currentSelectableIndex = 0;
-        uint8_t m_numSelectables = 0;
+        static constexpr uint8_t kMaxGameInfoEntries = 255; 
+        GameInfo m_gameInfoArray[kMaxGameInfoEntries];
+        uint8_t m_currentGameInfoIndex = 0;
+        uint8_t m_numGameInfos = 0;
 };

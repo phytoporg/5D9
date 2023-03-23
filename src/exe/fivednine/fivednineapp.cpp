@@ -82,96 +82,9 @@ bool fivednineApp::Initialize(const AppConfig& configuration)
         return false;
     }
 
-    // Load games info to populate selectables
-    const std::string& GamesDBPath = configuration.GetGamesDbPath();
-    if (!std::filesystem::exists(GamesDBPath))
+    if (!LoadGamesInfo(configuration))
     {
-        RELEASE_LOGLINE_ERROR(
-            LOG_DEFAULT,
-            "Games database configuration path does not exist: %s",
-            GamesDBPath.c_str());
         return false;
-    }
-
-    std::ifstream gamesDbIn(GamesDBPath);
-    json gamesDbData = json::parse(gamesDbIn);
-    if (!gamesDbData.contains("games"))
-    {
-        RELEASE_LOGLINE_ERROR(
-            LOG_DEFAULT,
-            "Games database missing required field 'games': %s",
-            GamesDBPath.c_str());
-        return false;
-    }
-
-    // Again, defer failure so we can log as much info as possible
-    bool failedParseGames = false;
-    json gamesArray = gamesDbData["games"];
-    for (const auto& gameEntry : gamesArray)
-    {
-        if (m_numSelectables >= kMaxSelectableEntries)
-        {
-            // Don't fail here, but do log a warning.
-            RELEASE_LOGLINE_WARNING(
-                LOG_DEFAULT,
-                "Reached maximum number of supported selectable games. Stopping.");
-            return true;
-        }
-
-        Selectable selectableGame;;
-        if (!gameEntry.contains("title"))
-        {
-            RELEASE_LOGLINE_ERROR(
-                LOG_DEFAULT,
-                "Game DB entry is missing required field: 'title'");
-            failedParseGames = true;
-            continue;
-        }
-        selectableGame.Title = gameEntry["title"].get<std::string>();
-
-        if (!gameEntry.contains("alias"))
-        {
-            RELEASE_LOGLINE_ERROR(
-                LOG_DEFAULT,
-                "Game DB entry %s is missing required field: 'alias'",
-                selectableGame.Title.c_str());
-            failedParseGames = true;
-            continue;
-        }
-        selectableGame.Alias = gameEntry["alias"].get<std::string>();
-
-        if (!gameEntry.contains("texture_prefix"))
-        {
-            RELEASE_LOGLINE_ERROR(
-                LOG_DEFAULT,
-                "Game DB entry %s is missing required field: 'texture_prefix'",
-                selectableGame.Title.c_str());
-            failedParseGames = true;
-            continue;
-        }
-        selectableGame.TexturePrefix = gameEntry["texture_prefix"].get<std::string>();
-
-        m_selectables[m_numSelectables] = selectableGame;
-        ++m_numSelectables;
-    }
-
-    if (failedParseGames)
-    {
-        if (m_numSelectables == 0)
-        {
-            RELEASE_LOGLINE_ERROR(
-                LOG_DEFAULT,
-                "Failed to load any selectable games. Exiting."
-            );
-            return false;
-        }
-        else
-        {
-            RELEASE_LOGLINE_WARNING(
-                LOG_DEFAULT,
-                "Failed to load some selectable games. Continuing initialization."
-            );
-        }
     }
 
     // Initialize view & projection matrices
@@ -184,7 +97,7 @@ bool fivednineApp::Initialize(const AppConfig& configuration)
         0.1f, 1000.f
     );
 
-    // TODO: Fix this wacked-out coordinat system
+    // TODO: Implement real camera abstraction
     glm::vec3 cameraPosition(windowWidth / -2.f, windowHeight / -2.f, 1.f);
     glm::vec3 cameraForward(0.f, 0.f, -1.f);
     glm::vec3 cameraUp(0.f, 1.f, 0.f);
@@ -394,6 +307,102 @@ bool fivednineApp::LoadShaders(const AppConfig& configuration)
     {
         RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to load one or more shaders.");
         return false;
+    }
+
+    return true;
+}
+
+bool fivednineApp::LoadGamesInfo(const AppConfig& configuration)
+{
+    const std::string& GamesDBPath = configuration.GetGamesDbPath();
+    if (!std::filesystem::exists(GamesDBPath))
+    {
+        RELEASE_LOGLINE_ERROR(
+            LOG_DEFAULT,
+            "Games database configuration path does not exist: %s",
+            GamesDBPath.c_str());
+        return false;
+    }
+
+    std::ifstream gamesDbIn(GamesDBPath);
+    json gamesDbData = json::parse(gamesDbIn);
+    if (!gamesDbData.contains("games"))
+    {
+        RELEASE_LOGLINE_ERROR(
+            LOG_DEFAULT,
+            "Games database missing required field 'games': %s",
+            GamesDBPath.c_str());
+        return false;
+    }
+
+    // Again, defer failure so we can log as much info as possible
+    bool failedParseGames = false;
+    json gamesArray = gamesDbData["games"];
+    for (const auto& gameEntry : gamesArray)
+    {
+        if (m_numGameInfos >= kMaxGameInfoEntries)
+        {
+            // Don't fail here, but do log a warning.
+            RELEASE_LOGLINE_WARNING(
+                LOG_DEFAULT,
+                "Reached maximum number of supported selectable games. Stopping.");
+            return true;
+        }
+
+        GameInfo gameInfo;
+        if (!gameEntry.contains("title"))
+        {
+            RELEASE_LOGLINE_ERROR(
+                LOG_DEFAULT,
+                "Game DB entry is missing required field: 'title'");
+            failedParseGames = true;
+            continue;
+        }
+        gameInfo.Title = gameEntry["title"].get<std::string>();
+
+        if (!gameEntry.contains("alias"))
+        {
+            RELEASE_LOGLINE_ERROR(
+                LOG_DEFAULT,
+                "Game DB entry %s is missing required field: 'alias'",
+                gameInfo.Title.c_str());
+            failedParseGames = true;
+            continue;
+        }
+        gameInfo.Alias = gameEntry["alias"].get<std::string>();
+
+        if (!gameEntry.contains("texture_prefix"))
+        {
+            RELEASE_LOGLINE_ERROR(
+                LOG_DEFAULT,
+                "Game DB entry %s is missing required field: 'texture_prefix'",
+                gameInfo.Title.c_str());
+            failedParseGames = true;
+            continue;
+        }
+        gameInfo.TexturePrefix = gameEntry["texture_prefix"].get<std::string>();
+
+        m_gameInfoArray[m_numGameInfos] = gameInfo;
+        ++m_numGameInfos;
+    }
+
+    if (failedParseGames)
+    {
+        if (m_numGameInfos == 0)
+        {
+            RELEASE_LOGLINE_ERROR(
+                LOG_DEFAULT,
+                "Failed to load any selectable games. Exiting."
+            );
+            return false;
+        }
+        else
+        {
+            RELEASE_LOGLINE_WARNING(
+                LOG_DEFAULT,
+                "Failed to load some selectable games. Continuing initialization."
+            );
+        }
     }
 
     return true;

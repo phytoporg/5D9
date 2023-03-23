@@ -2,7 +2,7 @@
 
 #include <string>
 
-struct Selectable
+struct GameInfo
 {
     std::string Title;
     std::string Alias;
