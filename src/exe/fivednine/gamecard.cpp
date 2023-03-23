@@ -32,32 +32,21 @@ const int GameCard::s_Indices[6] = {
     0, 2, 3
 };
 
+static constexpr uint32_t kMaxNumVertices = 4;
+static constexpr uint32_t kMaxNumIndices = 6;
+
 using namespace fivednine;
 using namespace fivednine::render;
 
-GameCard::GameCard(
-    ShaderPtr spShader,
-    TexturePtr spTexture,
-    const glm::vec3& upperLeft,
-    uint32_t width,
-    uint32_t height)
-    : m_cardMesh(4, 6), m_spTexture(spTexture)
+GameCard::GameCard(ShaderPtr spShader)
+    : m_cardMesh(kMaxNumVertices, kMaxNumIndices)
 {
-    // Each card's basic geometry is identical and represents a unit quad; use the 
-    // model matrix to translate and scale to achieve changes to position and proportions.
-    glm::mat4 modelMatrix(1.f);
+    m_cardMesh.SetModelMatrix(glm::mat4(1.f));
 
-    // Diagonal *= scale vector (z-axis scale is unity)
-    modelMatrix[0][0] *= static_cast<float>(width);
-    modelMatrix[1][1] *= static_cast<float>(height);
-    modelMatrix[3] = glm::vec4(upperLeft, 1.f);
-
+    m_cardMesh.SetShader(spShader);
     m_cardMesh.SetPositions(s_Vertices, 4);
     m_cardMesh.SetTextureCoordinates(s_UVs, 4);
     m_cardMesh.SetIndices(s_Indices, 6);
-    m_cardMesh.SetShader(spShader);
-    m_cardMesh.SetModelMatrix(modelMatrix);
-    m_cardMesh.SetTexture(m_spTexture);
 }
 
 void GameCard::Draw(const glm::mat4& projMatrix, const glm::mat4& viewMatrix)
@@ -65,7 +54,26 @@ void GameCard::Draw(const glm::mat4& projMatrix, const glm::mat4& viewMatrix)
     m_cardMesh.Draw(projMatrix, viewMatrix);
 }
 
+void GameCard::SetPosition(float x, float y, float z)
+{
+    glm::mat4& modelMatrix = m_cardMesh.GetModelMatrix();
+    modelMatrix[3] = glm::vec4(x, y, z, 1.f);
+}
+
+void GameCard::SetDimensions(float width, float height)
+{
+    // Diagonal *= scale vector (z-axis scale is unity)
+    glm::mat4& modelMatrix = m_cardMesh.GetModelMatrix();
+    modelMatrix[0][0] *= width;
+    modelMatrix[1][1] *= height;
+}
+
 TexturePtr GameCard::GetTexture() const
 {
-    return m_spTexture;
+    return m_cardMesh.GetTexture();
+}
+
+void GameCard::SetTexture(TexturePtr spTexture)
+{
+    m_cardMesh.SetTexture(spTexture);
 }

@@ -26,6 +26,7 @@ namespace fivednine { namespace log {
     {
         Default = 0,
         Render,
+        API,
         Max
     };
 
@@ -121,3 +122,4 @@ namespace fivednine { namespace log {
 
 #define LOG_DEFAULT fivednine::log::LogZone::Default
 #define LOG_RENDER fivednine::log::LogZone::Render
+#define LOG_API fivednine::log::LogZone::API

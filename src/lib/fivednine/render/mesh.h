@@ -55,8 +55,10 @@ namespace fivednine { namespace render {
 
             bool SetShader(ShaderPtr spShader);
             void SetModelMatrix(const glm::mat4& modelMatrix);
+            glm::mat4& GetModelMatrix();
 
             void SetTexture(TexturePtr spTexture);
+            TexturePtr GetTexture() const;
 
             // To be set for each draw call
             void SetMeshUniforms(const std::initializer_list<MeshUniformValue>& uniformValues);
@@ -75,9 +77,9 @@ namespace fivednine { namespace render {
             void UnbindAttributes();
 
             // Attributes
-            Attribute<glm::vec3>           m_VertexPositionAttribute;
-            Attribute<glm::vec2>           m_VertexTextureCoordinateAttribute;
-            IndexBuffer                    m_Indices;
+            Attribute<glm::vec3>   m_VertexPositionAttribute;
+            Attribute<glm::vec2>   m_VertexTextureCoordinateAttribute;
+            IndexBuffer            m_Indices;
 
             // Data
             std::vector<glm::vec3> m_VertexPositions;

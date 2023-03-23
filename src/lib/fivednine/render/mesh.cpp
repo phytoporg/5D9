@@ -182,9 +182,19 @@ void Mesh::SetModelMatrix(const glm::mat4& modelMatrix)
     m_ModelMatrix = modelMatrix;
 }
 
+glm::mat4& Mesh::GetModelMatrix()
+{
+    return m_ModelMatrix;
+}
+
 void Mesh::SetTexture(TexturePtr spTexture)
 {
     m_spTexture = spTexture;
+}
+
+TexturePtr Mesh::GetTexture() const
+{
+    return m_spTexture;
 }
 
 void Mesh::SetMeshUniforms(const std::initializer_list<MeshUniformValue>& uniformValues)

@@ -20,6 +20,7 @@ int main(int argc, char** argv)
     log::SetLogVerbosity(log::LogVerbosity::Warning);
     log::EnableZone(LOG_DEFAULT);
     log::EnableZone(LOG_RENDER);
+    log::EnableZone(LOG_API);
 
     cli::CommandLineArgumentParser argumentParser(argc, argv);
     const cli::CommandLineArgument* pConfigPathArgument = argumentParser.FindArgument("config");

@@ -1,14 +1,14 @@
 #pragma once
 
 #include "gameinfo.h"
+#include "gamecard.h"
+#include "eventpump.h"
+#include "carouselselector.h"
 
-// ****
-#include "gamecard.h" // TODO: forward decl?
-#include <memory>
-// ****
-
-#include <string>
 #include <cstdint>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include <glm/glm.hpp>
 
@@ -33,6 +33,20 @@ class fivednineApp
         void Tick(float dtSeconds);
         void Draw();
 
+        // TODO: factor these out into a designated, C-friendly selector API
+        // Attempting to make the selector itself stateless for future
+        // hot-loading and language binding ambitions.
+        uint32_t Selector_GetNumCards();
+        void     Selector_SelectIndex(uint32_t index);
+        uint32_t Selector_GetSelectedIndex();
+        void     Selector_ConfirmCurrentSelection();
+
+        bool Selector_GetCardGameInfo(uint32_t index, GameInfo* pGameInfoOut);
+        bool Selector_SetCardAppearanceParam1f(uint32_t index, const char* pParameterName, float value);
+        bool Selector_SetCardPosition(uint32_t index, float x, float y, float z);
+        bool Selector_SetCardDimensions(uint32_t index, float width, float height);
+        bool Selector_SetCardTexture(uint32_t index, const char* pTextureName);
+
     private:
         bool LoadTextures(const AppConfig& configuration);
         bool LoadShaders(const AppConfig& configuration);
@@ -47,12 +61,15 @@ class fivednineApp
         glm::mat4 m_projectionMatrix;
         glm::mat4 m_viewMatrix; // TODO: Replace with camera
 
-        std::unique_ptr<GameCard> m_spGameCard; // Just testing
-
         // TODO: factor app state into common structure
         // TODO: static array container
         static constexpr uint8_t kMaxGameInfoEntries = 255; 
         GameInfo m_gameInfoArray[kMaxGameInfoEntries];
-        uint8_t m_currentGameInfoIndex = 0;
         uint8_t m_numGameInfos = 0;
+
+        uint8_t m_currentSelectedCardIndex = 0;
+        std::vector<GameCardPtr> m_gameCards;
+
+        EventPump                         m_selectorEventPump;
+        std::unique_ptr<CarouselSelector> m_spSelector;
 };

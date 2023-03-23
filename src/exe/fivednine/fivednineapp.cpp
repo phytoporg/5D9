@@ -107,15 +107,21 @@ bool fivednineApp::Initialize(const AppConfig& configuration)
         cameraUp
     );
 
-    // PLACEHOLDER
-    ShaderPtr spGameCardShader = m_shaderStorage.FindShaderByName("selectable");
-    TexturePtr spGameCardTexture = m_textureStorage.FindTextureByName("plusr_600x900");
-    const float cardWidth = 200.0f;
-    const float cardHeight = 360.0f;
-    const glm::vec3 upperLeft(cardWidth / -2.f, cardHeight / -2.f, 0.f);
-    m_spGameCard.reset(
-        new GameCard(spGameCardShader, spGameCardTexture, upperLeft, cardWidth, cardHeight)
-    );
+    // Initialize game cards
+    ShaderPtr spGameCardShader = m_shaderStorage.FindShaderByName("gamecard");
+    for (uint32_t i = 0; i < m_numGameInfos; ++i)
+    {
+        m_gameCards.emplace_back(new GameCard(spGameCardShader));
+        RELEASE_CHECK(m_gameCards.back() != nullptr, "Failed to allocate game card");
+    }
+    m_spSelector.reset(new CarouselSelector(this, &m_selectorEventPump));
+    RELEASE_CHECK(m_spSelector != nullptr, "Failed to allocate selector");
+
+    if (!m_spSelector->Initialize())
+    {
+        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to initialize selector");
+        return false;
+    }
 
     m_isInitialized = true;
     return true;
@@ -134,7 +140,12 @@ void fivednineApp::Tick(float dtSeconds)
 void fivednineApp::Draw()
 {
     RELEASE_CHECK(m_isInitialized, "Attempting to draw app without having initialized");
-    m_spGameCard->Draw(m_projectionMatrix, m_viewMatrix);
+    // m_spGameCard->Draw(m_projectionMatrix, m_viewMatrix);
+
+    for (auto spGameCard : m_gameCards)
+    {
+        spGameCard->Draw(m_projectionMatrix, m_viewMatrix);
+    }
 }
 
 bool fivednineApp::LoadTextures(const AppConfig& configuration)
@@ -405,5 +416,100 @@ bool fivednineApp::LoadGamesInfo(const AppConfig& configuration)
         }
     }
 
+    return true;
+}
+
+// API METHODS
+uint32_t fivednineApp::Selector_GetNumCards()
+{
+    return m_numGameInfos;
+}
+
+void fivednineApp::Selector_SelectIndex(uint32_t index)
+{
+    RELEASE_CHECK(index >= 0 && index < m_numGameInfos, "Invalid card index: %u", index);
+    m_currentSelectedCardIndex = index;
+}
+
+uint32_t fivednineApp::Selector_GetSelectedIndex()
+{
+    return m_currentSelectedCardIndex;
+}
+
+void fivednineApp::Selector_ConfirmCurrentSelection()
+{
+    // TODO
+}
+
+bool fivednineApp::Selector_GetCardGameInfo(uint32_t index, GameInfo* pGameInfoOut)
+{
+    if (!pGameInfoOut)
+    {
+        RELEASE_LOGLINE_ERROR(LOG_API, "pGameInfoOut cannot be null");
+        return false;
+    }
+
+    if (index > m_numGameInfos)
+    {
+        RELEASE_LOGLINE_ERROR(LOG_API, "Game card index out of bounds: %u", index);
+        return false;
+    }
+
+    *pGameInfoOut = m_gameInfoArray[index];
+    return true;
+}
+
+bool fivednineApp::Selector_SetCardAppearanceParam1f(uint32_t index, const char* pParameterName, float value)
+{
+    if (index > m_numGameInfos)
+    {
+        RELEASE_LOGLINE_ERROR(LOG_API, "Game card index out of bounds: %u", index);
+        return false;
+    }
+
+    // TODO: expose uniforms for game card
+    return false;
+}
+
+bool fivednineApp::Selector_SetCardPosition(uint32_t index, float x, float y, float z)
+{
+    if (index > m_numGameInfos)
+    {
+        RELEASE_LOGLINE_ERROR(LOG_API, "Game card index out of bounds: %u", index);
+        return false;
+    }
+
+    m_gameCards[index]->SetPosition(x, y, z);
+    return true;
+}
+
+bool fivednineApp::Selector_SetCardDimensions(uint32_t index, float width, float height)
+{
+    if (index > m_numGameInfos)
+    {
+        RELEASE_LOGLINE_ERROR(LOG_API, "Game card index out of bounds: %u", index);
+        return false;
+    }
+
+    m_gameCards[index]->SetDimensions(width, height);
+    return false;
+}
+
+bool fivednineApp::Selector_SetCardTexture(uint32_t index, const char* pTextureName)
+{
+    if (index > m_numGameInfos)
+    {
+        RELEASE_LOGLINE_ERROR(LOG_API, "Game card index out of bounds: %u", index);
+        return false;
+    }
+
+    TexturePtr spTexture = m_textureStorage.FindTextureByName(pTextureName);
+    if (!spTexture)
+    {
+        RELEASE_LOGLINE_WARNING(LOG_API, "Failed to find texture %s", pTextureName);
+        return false;
+    }
+
+    m_gameCards[index]->SetTexture(spTexture);
     return true;
 }
