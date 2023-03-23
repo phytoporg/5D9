@@ -43,6 +43,8 @@ namespace countdown { namespace render {
         void Update() const;
         void Quit() const;
 
+        void GetWindowDimensions(uint32_t* pWidthOut, uint32_t* pHeightOut) const;
+
         typedef void(*FnKeyStateChangedHandler)(EventType, KeyType, void*);
         void SetKeyStateChangedHandler(FnKeyStateChangedHandler pfnHandler);
 

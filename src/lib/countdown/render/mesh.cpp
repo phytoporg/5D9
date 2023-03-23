@@ -13,12 +13,10 @@ using namespace countdown::render;
 void Mesh::CopyTo(Mesh& other) const
 {
     other.m_VertexPositionAttribute = m_VertexPositionAttribute;
-    other.m_VertexNormalAttribute = m_VertexNormalAttribute;
     other.m_VertexTextureCoordinateAttribute = m_VertexTextureCoordinateAttribute;
     other.m_Indices = m_Indices;
 
     other.m_VertexPositions = m_VertexPositions;
-    other.m_VertexNormals = m_VertexNormals;
     other.m_VertexTextureCoordinates = m_VertexTextureCoordinates;
     other.m_VertexIndices = other.m_VertexIndices;
 
@@ -40,15 +38,13 @@ void Mesh::CopyTo(Mesh& other) const
 void Mesh::BindAttributes()
 {
     m_VertexPositionAttribute.BindTo(0);
-    m_VertexNormalAttribute.BindTo(1);
-    m_VertexTextureCoordinateAttribute.BindTo(2);
+    m_VertexTextureCoordinateAttribute.BindTo(1);
 }
 
 void Mesh::UnbindAttributes()
 {
     m_VertexPositionAttribute.UnbindFrom(0);
-    m_VertexNormalAttribute.UnbindFrom(1);
-    m_VertexTextureCoordinateAttribute.UnbindFrom(2);
+    m_VertexTextureCoordinateAttribute.UnbindFrom(1);
 }
 
 Mesh::Mesh(size_t maxVertexCount, size_t maxIndexCount) 
@@ -60,11 +56,8 @@ Mesh::Mesh(size_t maxVertexCount, size_t maxIndexCount)
     m_VertexPositionAttribute.Set(m_VertexPositions.data(), maxVertexCount);
     m_VertexPositionAttribute.BindTo(0);
 
-    m_VertexNormalAttribute.Set(m_VertexNormals.data(), maxVertexCount);
-    m_VertexNormalAttribute.BindTo(1);
-
     m_VertexTextureCoordinateAttribute.Set(m_VertexTextureCoordinates.data(), maxVertexCount);
-    m_VertexTextureCoordinateAttribute.BindTo(2);
+    m_VertexTextureCoordinateAttribute.BindTo(1);
 
     m_Indices.Set(m_VertexIndices.data(), maxIndexCount);
 
@@ -232,7 +225,6 @@ void Mesh::Draw(const glm::mat4& projMatrix, const glm::mat4& viewMatrix)
     {
         // Update buffer objects
         m_VertexPositionAttribute.Set(m_VertexPositions.data(), m_VertexPositions.size());
-        m_VertexNormalAttribute.Set(m_VertexNormals.data(), m_VertexNormals.size());
         m_VertexTextureCoordinateAttribute.Set(m_VertexTextureCoordinates.data(), m_VertexTextureCoordinates.size());
         m_Indices.Set(m_VertexIndices.data(), m_VertexIndices.size());
         m_isDirty = false;

@@ -25,8 +25,8 @@ bool AppConfig::Parse(const std::string& configPath)
         RELEASE_LOG_ERROR(
             LOG_DEFAULT,
             "Configuration file %s is missing required key: 'textures_path'",
-            m_texturesPath);
-            return false;
+            configPath.c_str());
+        return false;
     }
     m_texturesPath = configData["textures_path"].get<std::string>();
 
@@ -35,13 +35,20 @@ bool AppConfig::Parse(const std::string& configPath)
         RELEASE_LOG_ERROR(
             LOG_DEFAULT,
             "Configuration file %s is missing required key: 'shaders_path'",
-            m_shadersPath);
-            return false;
+            configPath.c_str());
+        return false;
     }
     m_shadersPath = configData["shaders_path"].get<std::string>();
 
-    // TODO:
-    // const std::string GamesDbPath = configData["gamesdb_path"].get<std::string>();
+    if (!configData.contains("gamesdb_path"))
+    {
+        RELEASE_LOG_ERROR(
+            LOG_DEFAULT,
+            "Configuration file %s is missing required key: 'gamesdb_path'",
+            configPath.c_str());
+            return false;
+    }
+    m_gamesDbPath = configData["gamesdb_path"].get<std::string>();
 
     m_parsed = true;
     return true;
@@ -60,4 +67,9 @@ const std::string& AppConfig::GetShadersPath() const
 const std::string& AppConfig::GetTexturesPath() const
 {
     return m_texturesPath;
+}
+
+const std::string& AppConfig::GetGamesDbPath() const
+{
+    return m_gamesDbPath;
 }

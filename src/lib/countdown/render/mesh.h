@@ -45,7 +45,6 @@ namespace countdown { namespace render {
     class Mesh 
     {
         public:
-            Mesh();
             Mesh(size_t maxVertexCount, size_t maxIndexCount);
             Mesh(const Mesh& other);
             Mesh& operator=(const Mesh& other);
@@ -77,13 +76,11 @@ namespace countdown { namespace render {
 
             // Attributes
             Attribute<glm::vec3>           m_VertexPositionAttribute;
-            Attribute<glm::vec3>           m_VertexNormalAttribute;
             Attribute<glm::vec2>           m_VertexTextureCoordinateAttribute;
             IndexBuffer                    m_Indices;
 
             // Data
             std::vector<glm::vec3> m_VertexPositions;
-            std::vector<glm::vec3> m_VertexNormals;
             std::vector<glm::vec2> m_VertexTextureCoordinates;
             std::vector<uint32_t>  m_VertexIndices;
 

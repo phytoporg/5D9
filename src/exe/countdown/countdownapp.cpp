@@ -7,10 +7,15 @@
 #include <fstream>
 #include <sstream>
 
+#include <json/json.hpp>
+
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <countdown/render/window.h>
 #include <countdown/log/log.h>
 #include <countdown/log/check.h>
 
+using json = nlohmann::json;
 using namespace countdown;
 using namespace countdown::render;
 
@@ -169,7 +174,6 @@ bool CountdownApp::Initialize(const AppConfig& configuration)
     }
 
     // Read, compile, link and store the shader programs
-
     // Defer failure for comprehensive logging
     bool failedShaderLoad = false;
     for (const ShaderProgramLookup& shaderProgramLookup : shaderLookupStates)
@@ -233,6 +237,124 @@ bool CountdownApp::Initialize(const AppConfig& configuration)
         return false;
     }
 
+    // Load games info to populate selectables
+    const std::string& GamesDBPath = configuration.GetGamesDbPath();
+    if (!std::filesystem::exists(GamesDBPath))
+    {
+        RELEASE_LOGLINE_ERROR(
+            LOG_DEFAULT,
+            "Games database configuration path does not exist: %s",
+            GamesDBPath.c_str());
+        return false;
+    }
+
+    std::ifstream gamesDbIn(GamesDBPath);
+    json gamesDbData = json::parse(gamesDbIn);
+    if (!gamesDbData.contains("games"))
+    {
+        RELEASE_LOGLINE_ERROR(
+            LOG_DEFAULT,
+            "Games database missing required field 'games': %s",
+            GamesDBPath.c_str());
+        return false;
+    }
+
+    // Again, defer failure so we can log as much info as possible
+    bool failedParseGames = false;
+    json gamesArray = gamesDbData["games"];
+    for (const auto& gameEntry : gamesArray)
+    {
+        if (m_numSelectables >= kMaxSelectableEntries)
+        {
+            // Don't fail here, but do log a warning.
+            RELEASE_LOGLINE_WARNING(
+                LOG_DEFAULT,
+                "Reached maximum number of supported selectable games. Stopping.");
+            return true;
+        }
+
+        Selectable selectableGame;;
+        if (!gameEntry.contains("title"))
+        {
+            RELEASE_LOGLINE_ERROR(
+                LOG_DEFAULT,
+                "Game DB entry is missing required field: 'title'");
+            failedParseGames = true;
+            continue;
+        }
+        selectableGame.Title = gameEntry["title"].get<std::string>();
+
+        if (!gameEntry.contains("alias"))
+        {
+            RELEASE_LOGLINE_ERROR(
+                LOG_DEFAULT,
+                "Game DB entry %s is missing required field: 'alias'",
+                selectableGame.Title.c_str());
+            failedParseGames = true;
+            continue;
+        }
+        selectableGame.Alias = gameEntry["alias"].get<std::string>();
+
+        if (!gameEntry.contains("texture_prefix"))
+        {
+            RELEASE_LOGLINE_ERROR(
+                LOG_DEFAULT,
+                "Game DB entry %s is missing required field: 'texture_prefix'",
+                selectableGame.Title.c_str());
+            failedParseGames = true;
+            continue;
+        }
+        selectableGame.TexturePrefix = gameEntry["texture_prefix"].get<std::string>();
+
+        m_selectables[m_numSelectables] = selectableGame;
+        ++m_numSelectables;
+    }
+
+    if (failedParseGames)
+    {
+        if (m_numSelectables == 0)
+        {
+            RELEASE_LOGLINE_ERROR(
+                LOG_DEFAULT,
+                "Failed to load any selectable games. Exiting."
+            );
+            return false;
+        }
+        else
+        {
+            RELEASE_LOGLINE_WARNING(
+                LOG_DEFAULT,
+                "Failed to load some selectable games. Continuing initialization."
+            );
+        }
+    }
+
+    // Initialize view & projection matrices
+    // TODO: Decouple from window size
+    uint32_t windowWidth, windowHeight;
+    m_pWindow->GetWindowDimensions(&windowWidth, &windowHeight);
+    m_projectionMatrix = glm::ortho(
+        0.f, static_cast<float>(windowWidth),
+        static_cast<float>(windowHeight), 0.f,
+        0.1f, 1000.f
+    );
+
+    glm::vec3 cameraPosition(windowWidth / -2.f, windowHeight / 2.f, -1.f);
+    glm::vec3 cameraForward(0.f, 0.f, 1.f);
+    glm::vec3 cameraUp(0.f, -1.f, 0.f);
+    m_viewMatrix = glm::lookAt(
+        cameraPosition,
+        cameraPosition + cameraForward,
+        cameraUp
+    );
+
+    // PLACEHOLDER
+    ShaderPtr spGameCardShader = m_shaderStorage.FindShaderByName("selectable");
+    const float cardWidth = 100.0f;
+    const float cardHeight = 120.0f;
+    const glm::vec3 upperLeft(0.f);
+    m_spGameCard.reset(new GameCard(spGameCardShader, upperLeft, cardWidth, cardHeight));
+
     m_isInitialized = true;
     return true;
 }
@@ -250,6 +372,7 @@ void CountdownApp::Tick(float dtSeconds)
 void CountdownApp::Draw()
 {
     RELEASE_CHECK(m_isInitialized, "Attempting to draw app without having initialized");
+    m_spGameCard->Draw(m_projectionMatrix, m_viewMatrix);
 }
 
 bool CountdownApp::LoadTexturesFromPath(const std::string& texturesPath)

@@ -1,7 +1,10 @@
 #pragma once
 
+#include <string>
+
 struct Selectable
 {
-    // TODO: asset IDs
-    // TODO: Game info
+    std::string Title;
+    std::string Alias;
+    std::string TexturePrefix;
 };

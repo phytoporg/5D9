@@ -86,9 +86,8 @@ int main(int argc, char** argv)
         {
             time::SleepMs(kTicksPerFrame - dtTicks);
         }
-        
 
-        window.Clear(ColorRGB::WHITE);
+        window.Clear(ColorRGB::BLACK);
         app.Draw();
         window.Update();
     }

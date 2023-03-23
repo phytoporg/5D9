@@ -42,10 +42,6 @@ Window::Window(const char* pWindowName, uint32_t width, uint32_t height)
 {
     RELEASE_CHECK(pWindowName != nullptr, "Window requires a name");
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
     m_pWindow = SDL_CreateWindow(
             pWindowName,
             SDL_WINDOWPOS_UNDEFINED,
@@ -56,6 +52,11 @@ Window::Window(const char* pWindowName, uint32_t width, uint32_t height)
     RELEASE_CHECK(
         m_pWindow != nullptr,
         "Failed to create SDL window %s: %s", pWindowName, SDL_GetError());
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
 
     SDL_GLContext context = SDL_GL_CreateContext(m_pWindow);
     if (SDL_GL_MakeCurrent(m_pWindow, context) < 0)
@@ -68,12 +69,13 @@ Window::Window(const char* pWindowName, uint32_t width, uint32_t height)
         RELEASE_LOG_FATAL(LOG_RENDER, "Failed to set swap interval: %s", SDL_GetError());
     }
 
+    glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK)
     {
         RELEASE_LOG_FATAL(LOG_RENDER, "Failed to initialize GLEW");
     }
 
-    glViewport(1.0f, 0.0f, 1.0f, 0.0f);
+    glViewport(0.f, 0.f, width, height);
 }
 
 Window::~Window()
@@ -127,6 +129,15 @@ void Window::Quit() const
     SDL_Event quitEvent;
     quitEvent.type = SDL_QUIT;
     SDL_PushEvent(&quitEvent);
+}
+
+void Window::GetWindowDimensions(uint32_t* pWidthOut, uint32_t* pHeightOut) const
+{
+    int width, height;
+    SDL_GetWindowSize(m_pWindow, &width, &height);
+
+    *pWidthOut = static_cast<uint32_t>(width);
+    *pHeightOut = static_cast<uint32_t>(height);
 }
 
 void Window::SetKeyStateChangedHandler(FnKeyStateChangedHandler pfnHandler)

@@ -3,33 +3,43 @@
     [
         {
             "title" : "GUILTY GEAR XX ACCENT CORE PLUS R",
-            "aliases" :
-            [
-                "+R", "PlusR"
-            ],
-            "appid" : 348550,
+            "alias" : "+R",
+            "steam_appid" : 348550,
             "proton" : true,
-            "supported" : true
+            "supported" : true,
+            "texture_prefix" : "plusr"
         },
         {
             "title" : "Guilty Gear Xrd REV 2",
-            "aliases" :
-            [
-                "Xrd", "Rev2", "rev24ev2"
-            ],
-            "appid" : 520440,
+            "alias" : "Rev2",
+            "steam_appid" : 520440,
             "proton" : true,
-            "supported" : false
+            "supported" : false,
+            "texture_prefix" : "ggxrdr2"
         },
         {
             "title" : "Them's Fightin' Herds",
-            "aliases" :
-            [
-                "TFH", "NotPonies"
-            ],
-            "appid" : 574980,
+            "alias" : "TFH",
+            "steam_appid" : 574980,
             "proton" : false,
-            "supported" : false
+            "supported" : false,
+            "texture_prefix" : "tfh"
+        },
+        {
+            "title" : "Melty Blood: Type Lumina",
+            "alias" : "MBTL",
+            "steam_appid" : 1372280,
+            "proton" : true,
+            "supported" : false,
+            "texture_prefix" : "mbtl"
+        },
+        {
+            "title" : "Melty Blood: Actress Again Current Code",
+            "alias" : "MBAACC",
+            "steam_appid" : 411370,
+            "proton" : true,
+            "supported" : false,
+            "texture_prefix" : "mbaacc"
         }
     ]
 }

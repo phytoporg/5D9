@@ -1,8 +1,16 @@
 #pragma once
 
 #include "selectable.h"
+
+// ****
+#include "gamecard.h" // TODO: forward decl?
+#include <memory>
+// ****
+
 #include <string>
 #include <cstdint>
+
+#include <glm/glm.hpp>
 
 #include <countdown/render/texturestorage.h>
 #include <countdown/render/shaderstorage.h>
@@ -34,6 +42,11 @@ class CountdownApp
         countdown::render::Window* m_pWindow = nullptr;
         countdown::render::TextureStorage m_textureStorage;
         countdown::render::ShaderStorage  m_shaderStorage;
+
+        glm::mat4 m_projectionMatrix;
+        glm::mat4 m_viewMatrix; // TODO: Replace with camera
+
+        std::unique_ptr<GameCard> m_spGameCard; // Just testing
 
         // TODO: factor app state into common structure
         // TODO: static array container
