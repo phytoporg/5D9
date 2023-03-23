@@ -339,9 +339,10 @@ bool CountdownApp::Initialize(const AppConfig& configuration)
         0.1f, 1000.f
     );
 
-    glm::vec3 cameraPosition(windowWidth / -2.f, windowHeight / 2.f, -1.f);
-    glm::vec3 cameraForward(0.f, 0.f, 1.f);
-    glm::vec3 cameraUp(0.f, -1.f, 0.f);
+    // TODO: Fix this wacked-out coordinat system
+    glm::vec3 cameraPosition(windowWidth / -2.f, windowHeight / -2.f, 1.f);
+    glm::vec3 cameraForward(0.f, 0.f, -1.f);
+    glm::vec3 cameraUp(0.f, 1.f, 0.f);
     m_viewMatrix = glm::lookAt(
         cameraPosition,
         cameraPosition + cameraForward,
@@ -350,10 +351,13 @@ bool CountdownApp::Initialize(const AppConfig& configuration)
 
     // PLACEHOLDER
     ShaderPtr spGameCardShader = m_shaderStorage.FindShaderByName("selectable");
-    const float cardWidth = 100.0f;
-    const float cardHeight = 120.0f;
-    const glm::vec3 upperLeft(0.f);
-    m_spGameCard.reset(new GameCard(spGameCardShader, upperLeft, cardWidth, cardHeight));
+    TexturePtr spGameCardTexture = m_textureStorage.FindTextureByName("tfh_600x900");
+    const float cardWidth = 200.0f;
+    const float cardHeight = 360.0f;
+    const glm::vec3 upperLeft(cardWidth / -2.f, cardHeight / -2.f, 0.f);
+    m_spGameCard.reset(
+        new GameCard(spGameCardShader, spGameCardTexture, upperLeft, cardWidth, cardHeight)
+    );
 
     m_isInitialized = true;
     return true;

@@ -1,12 +1,11 @@
 #version 330 core
-uniform vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
-uniform sampler2D textureData;
+uniform vec4 tint = vec4(1.0, 1.0, 1.0, 1.0);
+uniform sampler2D sampler;
 
 in vec2 uv;
 out vec4 fragmentColor;
 
 void main()
 {
-    // fragmentColor = color * vec4(texture(textureData, uv).rgb, 1.0);
-    fragmentColor = vec4(1.0, 0.0, 0.0, 1.0);
+    fragmentColor = tint * vec4(texture(sampler, uv).rgb, 1.0);
 }

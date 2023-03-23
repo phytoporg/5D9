@@ -154,12 +154,37 @@ bool Mesh::SetShader(ShaderPtr spShader)
         return false;
     }
 
+    m_ProjUniformHandle = spShader->GetUniform("projection");
+    if (m_ProjUniformHandle == Shader::kInvalidHandleValue)
+    {
+        RELEASE_LOGLINE_ERROR(
+            LOG_RENDER,
+            "Could not retrieve expected uniform 'projection' from shader '%s'",
+            spShader->GetName().c_str());
+        return false;
+    }
+
+    m_SamplerUniformHandle = spShader->GetUniform("sampler");
+    if (m_SamplerUniformHandle == Shader::kInvalidHandleValue)
+    {
+        RELEASE_LOGLINE_ERROR(
+            LOG_RENDER,
+            "Could not retrieve expected uniform 'sampler' from shader '%s'",
+            spShader->GetName().c_str());
+        return false;
+    }
+
     return true;
 }
 
 void Mesh::SetModelMatrix(const glm::mat4& modelMatrix) 
 {
     m_ModelMatrix = modelMatrix;
+}
+
+void Mesh::SetTexture(TexturePtr spTexture)
+{
+    m_spTexture = spTexture;
 }
 
 void Mesh::SetMeshUniforms(const std::initializer_list<MeshUniformValue>& uniformValues)
@@ -217,13 +242,18 @@ void Mesh::Draw(const glm::mat4& projMatrix, const glm::mat4& viewMatrix)
     Uniform<glm::mat4>::Set(m_ViewUniformHandle, viewMatrix);
     Uniform<glm::mat4>::Set(m_ProjUniformHandle, projMatrix);
 
+    if (m_spTexture)
+    {
+        Uniform<int>::Set(m_SamplerUniformHandle, 0);
+        m_spTexture->Bind();
+    }
+
     glBindVertexArray(m_VAO);
 
     BindAttributes();
 
     if (m_isDirty)
     {
-        // Update buffer objects
         m_VertexPositionAttribute.Set(m_VertexPositions.data(), m_VertexPositions.size());
         m_VertexTextureCoordinateAttribute.Set(m_VertexTextureCoordinates.data(), m_VertexTextureCoordinates.size());
         m_Indices.Set(m_VertexIndices.data(), m_VertexIndices.size());
@@ -236,6 +266,11 @@ void Mesh::Draw(const glm::mat4& projMatrix, const glm::mat4& viewMatrix)
     m_spShader->Unbind();
 
     glBindVertexArray(0);
+
+    if (m_spTexture)
+    {
+        m_spTexture->Unbind();
+    }
 }
 
 void Mesh::SetVisibility(bool newVisibility)

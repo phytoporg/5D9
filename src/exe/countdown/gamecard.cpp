@@ -36,8 +36,13 @@ const int GameCard::s_Indices[6] = {
 using namespace countdown;
 using namespace countdown::render;
 
-GameCard::GameCard(ShaderPtr spShader, const glm::vec3& upperLeft, uint32_t width, uint32_t height)
-    : m_cardMesh(4, 6)
+GameCard::GameCard(
+    ShaderPtr spShader,
+    TexturePtr spTexture,
+    const glm::vec3& upperLeft,
+    uint32_t width,
+    uint32_t height)
+    : m_cardMesh(4, 6), m_spTexture(spTexture)
 {
     // By default each card's basic geometry is identical and represents a unit quad; use the 
     // model matrix to translate and scale to achieve changes to position and proportions.
@@ -53,9 +58,15 @@ GameCard::GameCard(ShaderPtr spShader, const glm::vec3& upperLeft, uint32_t widt
     m_cardMesh.SetIndices(s_Indices, 6);
     m_cardMesh.SetShader(spShader);
     m_cardMesh.SetModelMatrix(modelMatrix);
+    m_cardMesh.SetTexture(m_spTexture);
 }
 
 void GameCard::Draw(const glm::mat4& projMatrix, const glm::mat4& viewMatrix)
 {
     m_cardMesh.Draw(projMatrix, viewMatrix);
+}
+
+TexturePtr GameCard::GetTexture() const
+{
+    return m_spTexture;
 }

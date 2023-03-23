@@ -1,6 +1,7 @@
 #pragma once
 
 #include "shader.h"
+#include "texture.h"
 #include "uniform.h"
 #include <cstring>
 #include <vector>
@@ -11,7 +12,6 @@
 #include <glm/glm.hpp>
 
 namespace countdown { namespace render {
-    class Shader;
 
     struct MeshUniformValue
     {
@@ -56,6 +56,8 @@ namespace countdown { namespace render {
             bool SetShader(ShaderPtr spShader);
             void SetModelMatrix(const glm::mat4& modelMatrix);
 
+            void SetTexture(TexturePtr spTexture);
+
             // To be set for each draw call
             void SetMeshUniforms(const std::initializer_list<MeshUniformValue>& uniformValues);
 
@@ -66,8 +68,6 @@ namespace countdown { namespace render {
 
             // Force a render state update
             void MarkDirty();
-
-            // TODO: texture(s)?
 
         private:
             void CopyTo(Mesh& other) const;
@@ -96,6 +96,9 @@ namespace countdown { namespace render {
             uint32_t               m_ModelUniformHandle;
             uint32_t               m_ViewUniformHandle;
             uint32_t               m_ProjUniformHandle;
+            uint32_t               m_SamplerUniformHandle;
+
+            TexturePtr             m_spTexture;
 
             bool                   m_isDirty   = true;
             bool                   m_isVisible = true;
