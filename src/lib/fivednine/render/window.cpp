@@ -105,6 +105,9 @@ Window::EventType Window::PollEvents() const
                         SDLKeySymToKeyType(e.key.keysym.sym),
                         m_pUserPointer);
                 }
+                break;
+            default:
+                break;
         }
 
         return EventType;

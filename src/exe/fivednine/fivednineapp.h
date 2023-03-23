@@ -34,8 +34,8 @@ class fivednineApp
         void Draw();
 
     private:
-        bool LoadTexturesFromPath(const std::string& texturesPath);
-        bool LoadShadersFromPath(const std::string& shadersPath);
+        bool LoadTextures(const AppConfig& configuration);
+        bool LoadShaders(const AppConfig& configuration);
 
     private:
         bool                       m_isInitialized = false;
