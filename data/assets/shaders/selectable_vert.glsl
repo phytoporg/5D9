@@ -1,3 +1,4 @@
+#version 330 core
 layout(location = 0) in mat4 modelmatrix;
 layout(location = 1) in vec3 position;
 layout(location = 2) in vec2 texCoords;
