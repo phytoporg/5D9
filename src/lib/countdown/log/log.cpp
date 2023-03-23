@@ -83,7 +83,7 @@ void countdown::log::LogLine(LogZone zone, LogVerbosity verbosity, const char* p
     perror(formatted);
     va_end(args);
 
-    fprintf(s_pFile, "%s: %s\n", ZoneToString(zone), formatted);
+    fprintf(s_pFile, "[%s] %s\n", ZoneToString(zone), formatted);
 }
 
 void countdown::log::Log(LogZone zone, LogVerbosity verbosity, const char* pFormatString, ...)
@@ -101,7 +101,7 @@ void countdown::log::Log(LogZone zone, LogVerbosity verbosity, const char* pForm
     perror(formatted);
     va_end(args);
 
-    fprintf(s_pFile, "%s: %s", ZoneToString(zone), formatted);
+    fprintf(s_pFile, "[%s] %s", ZoneToString(zone), formatted);
 }
 
 void countdown::log::LogAndFail(LogZone zone, const char* pFormatString, ...)
@@ -114,7 +114,7 @@ void countdown::log::LogAndFail(LogZone zone, const char* pFormatString, ...)
     perror(formatted);
     va_end(args);
 
-    fprintf(s_pFile, "%s: %s", ZoneToString(zone), formatted);
+    fprintf(s_pFile, "[%s] %s", ZoneToString(zone), formatted);
 
     throw std::exception();
 }
@@ -129,7 +129,7 @@ void countdown::log::LogLineAndFail(LogZone zone, const char* pFormatString, ...
     perror(formatted);
     va_end(args);
 
-    fprintf(s_pFile, "%s: %s\n", ZoneToString(zone), formatted);
+    fprintf(s_pFile, "[%s] %s\n", ZoneToString(zone), formatted);
 
     throw std::exception();
 }
