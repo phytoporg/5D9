@@ -2,11 +2,11 @@
 - Load configuration file?
 -- --config param for config path pointing to assets, shaders, etc.
 - Draw basic textured quads
-* Implement "selector" API via dynlib
 * Basic carousel selector
 * Keyboard navigation
 * Process management solution
 * Controller navigation
+* Implement "selector" API via dynlib
 * Hot-loadable selector implementation
 * Animations and presentation
 * Freetype font rendering
