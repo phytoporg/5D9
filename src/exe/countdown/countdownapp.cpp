@@ -3,7 +3,9 @@
 
 #include <algorithm>
 #include <filesystem>
-#include <unordered_map>
+#include <vector>
+#include <fstream>
+#include <sstream>
 
 #include <countdown/render/window.h>
 #include <countdown/log/log.h>
@@ -17,28 +19,28 @@ namespace
     bool IsTextureAssetPath(const std::filesystem::path& filePath)
     {
         // Just supports png files for the moment
-        return filePath.extension() == "*.png";
+        return filePath.extension() == ".png";
     }
 
     bool IsShaderAssetPath(const std::filesystem::path& filePath)
     {
         // glsl only
-        return filePath.extension() == "*.glsl";
+        return filePath.extension() == ".glsl";
     }
 
     bool 
     ShaderProgramNameAndShaderTypeFromFilePath(
         const std::filesystem::path& filePath,
-        std::string* pProgramName,
-        std::string* pShaderType)
+        std::string* pProgramNameOut,
+        std::string* pShaderTypeOut)
     {
-        RELEASE_CHECK(pProgramName != nullptr, "pProgramName cannot be null");
-        *pProgramName = "";
+        RELEASE_CHECK(pProgramNameOut != nullptr, "pProgramNameOut cannot be null");
+        *pProgramNameOut = "";
 
-        RELEASE_CHECK(pShaderType != nullptr, "pShaderType cannot be null");
-        *pShaderType = "";
+        RELEASE_CHECK(pShaderTypeOut != nullptr, "pShaderTypeOut cannot be null");
+        *pShaderTypeOut = "";
 
-        const std::string StemString = filePath.filename().string();
+        const std::string StemString = filePath.stem().string();
 
         // The expected format is <programname>_<shadertype>.<extension>
         const size_t LastUnderscoreIndex = StemString.find_last_of('_');
@@ -51,8 +53,8 @@ namespace
                 return false;
         }
 
-        *pProgramName = StemString.substr(0, LastUnderscoreIndex);
-        *pShaderType = StemString.substr(LastUnderscoreIndex + 1);
+        *pProgramNameOut = StemString.substr(0, LastUnderscoreIndex);
+        *pShaderTypeOut = StemString.substr(LastUnderscoreIndex + 1);
         return true;
     }
 }
@@ -81,21 +83,30 @@ bool CountdownApp::Initialize(const AppConfig& configuration)
         const std::filesystem::path FilePath = directoryEntry.path();
         if (directoryEntry.is_regular_file() && IsTextureAssetPath(FilePath))
         {
-            if (!m_textureStorage.AddTextureFromImagePath(FilePath.c_str(), FilePath.stem().c_str()))
+            const std::string& textureName = FilePath.stem().string();
+            if (!m_textureStorage.AddTextureFromImagePath(FilePath.c_str(), textureName))
             {
-                RELEASE_LOG_WARNING(
+                RELEASE_LOGLINE_WARNING(
                     LOG_DEFAULT,
                     "Failed to add texture from file %s",
                     FilePath.c_str());
             }
+            else
+            {
+                RELEASE_LOGLINE_INFO(
+                    LOG_DEFAULT,
+                    "Successfully added texture %s",
+                    textureName.c_str()
+                );
+            }
         }
     }
 
-    // TODO: Load shaders
+    // Load shaders
     const std::string& ShadersPath = configuration.GetShadersPath();
     if (!std::filesystem::exists(ShadersPath))
     {
-        RELEASE_LOG_ERROR(
+        RELEASE_LOGLINE_ERROR(
             LOG_DEFAULT,
             "Shaders path does not exist: %s",
             ShadersPath.c_str());
@@ -149,7 +160,7 @@ bool CountdownApp::Initialize(const AppConfig& configuration)
             }
             else
             {
-                RELEASE_LOG_WARNING(
+                RELEASE_LOGLINE_WARNING(
                     LOG_DEFAULT,
                     "Unexpected shader type for file %s",
                     FilePath.string().c_str());
@@ -157,10 +168,69 @@ bool CountdownApp::Initialize(const AppConfig& configuration)
         }
     }
 
-    // Compile, link and store the shader programs
+    // Read, compile, link and store the shader programs
+
+    // Defer failure for comprehensive logging
+    bool failedShaderLoad = false;
     for (const ShaderProgramLookup& shaderProgramLookup : shaderLookupStates)
     {
-        // TODO
+        std::ifstream vertexShaderIn(shaderProgramLookup.VertexShaderPath);
+        if (!vertexShaderIn.good())
+        {
+            RELEASE_LOGLINE_ERROR(
+                LOG_DEFAULT,
+                "Failed to open vertex shader %s for shader program %s",
+                shaderProgramLookup.VertexShaderPath.c_str(),
+                shaderProgramLookup.ProgramName.c_str()
+            );
+            failedShaderLoad = true;
+            continue;
+        }
+
+        std::ifstream fragmentShaderIn(shaderProgramLookup.FragmentShaderPath);
+        if (!fragmentShaderIn.good())
+        {
+            RELEASE_LOGLINE_ERROR(
+                LOG_DEFAULT,
+                "Failed to open fragment shader %s for shader program %s",
+                shaderProgramLookup.FragmentShaderPath.c_str(),
+                shaderProgramLookup.ProgramName.c_str()
+            );
+            failedShaderLoad = true;
+            continue;
+        }
+
+        std::stringstream vertexStringStream;
+        vertexStringStream << vertexShaderIn.rdbuf();
+
+        std::stringstream fragmentStringStream;
+        fragmentStringStream << fragmentShaderIn.rdbuf();
+
+        if (!m_shaderStorage.AddShader(
+            vertexStringStream.str(),
+            fragmentStringStream.str(),
+            shaderProgramLookup.ProgramName))
+        {
+            RELEASE_LOGLINE_ERROR(
+                LOG_DEFAULT,
+                "Failed to add shader program %s",
+                shaderProgramLookup.ProgramName.c_str());
+            failedShaderLoad = true;
+        }
+        else
+        {
+            RELEASE_LOGLINE_INFO(
+                LOG_DEFAULT,
+                "Successfully added shader program %s",
+                shaderProgramLookup.ProgramName.c_str()
+            );
+        }
+    }
+
+    if (failedShaderLoad)
+    {
+        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to load one or more shaders.");
+        return false;
     }
 
     m_isInitialized = true;

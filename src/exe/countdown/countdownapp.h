@@ -5,6 +5,7 @@
 #include <cstdint>
 
 #include <countdown/render/texturestorage.h>
+#include <countdown/render/shaderstorage.h>
 
 namespace countdown 
 {
@@ -32,6 +33,7 @@ class CountdownApp
         bool                       m_isInitialized = false;
         countdown::render::Window* m_pWindow = nullptr;
         countdown::render::TextureStorage m_textureStorage;
+        countdown::render::ShaderStorage  m_shaderStorage;
 
         // TODO: factor app state into common structure
         // TODO: static array container
