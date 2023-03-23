@@ -95,7 +95,7 @@ uint32_t ShaderStorage::CompileVertexShader(const std::string& source)
     {
         char infoLog[512];
         glGetShaderInfoLog(shaderHandle, sizeof(infoLog), NULL, infoLog);
-        RELEASE_LOGLINE_ERROR(LOG_RENDER, "Vertex shader compilation failed\n\t%s", infoLog);
+        RELEASE_LOGLINE_ERROR(LOG_RENDER, "Vertex shader compilation failed (%s)\n\t%s", infoLog);
         glDeleteProgram(shaderHandle);
         return 0;
     }
@@ -116,7 +116,7 @@ uint32_t ShaderStorage::CompileFragmentShader(const std::string& source)
     {
         char infoLog[512];
         glGetShaderInfoLog(shaderHandle, sizeof(infoLog), NULL, infoLog);
-        RELEASE_LOGLINE_ERROR(LOG_RENDER, "Vertex shader compilation failed\n\t%s", infoLog);
+        RELEASE_LOGLINE_ERROR(LOG_RENDER, "Fragment shader compilation failed\n\t%s", infoLog);
         glDeleteProgram(shaderHandle);
         return 0;
     }
