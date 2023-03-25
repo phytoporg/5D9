@@ -12,13 +12,12 @@ CarouselSelector::CarouselSelector(fivednineApp* pApp, EventPump* pEventPump)
 float Tinted = 0.3f;
 float UnTinted = 1.0f;
 
+static const float kGameCardPaddingX = 20.f;
+static const uint32_t kInitialCardWidth = 200;
+static const uint32_t kInitialCardHeight = 360;
+
 bool CarouselSelector::Initialize()
 {
-    const float kGameCardPaddingX = 20.f;
-
-    const uint32_t kInitialCardWidth = 200;
-    const uint32_t kInitialCardHeight = 360;
-
     uint32_t width;
     uint32_t height;
     m_pApp->Selector_GetDisplayDimensions(&width, &height);
@@ -53,6 +52,7 @@ bool CarouselSelector::Initialize()
     }
 
     m_pApp->Selector_SelectIndex(MiddleCardIndex);
+    SnapCameraToCard(MiddleCardIndex);
     return true;
 }
 
@@ -87,6 +87,8 @@ void CarouselSelector::HandleInputEvent(const SelectorInputEventPayload& inputEv
                 m_pApp->Selector_SelectIndex(NewSelectedIndex);
                 m_pApp->Selector_SetCardAppearanceParam1f(CurrentCardIndex, "tint", &Tinted);
                 m_pApp->Selector_SetCardAppearanceParam1f(NewSelectedIndex, "tint", &UnTinted);
+
+                MoveCameraToCard(NewSelectedIndex);
             }
         }
             break;
@@ -100,6 +102,8 @@ void CarouselSelector::HandleInputEvent(const SelectorInputEventPayload& inputEv
                 m_pApp->Selector_SelectIndex(NewSelectedIndex);
                 m_pApp->Selector_SetCardAppearanceParam1f(CurrentCardIndex, "tint", &Tinted);
                 m_pApp->Selector_SetCardAppearanceParam1f(NewSelectedIndex, "tint", &UnTinted);
+
+                MoveCameraToCard(NewSelectedIndex);
             }
         }
             break;
@@ -108,5 +112,39 @@ void CarouselSelector::HandleInputEvent(const SelectorInputEventPayload& inputEv
             break;
         default:
             break;
+    }
+}
+
+void CarouselSelector::MoveCameraToCard(uint32_t cardIndex)
+{
+    glm::vec3 newSelectedCardPosition;
+    if (m_pApp->Selector_GetCardPosition(cardIndex, &newSelectedCardPosition))
+    {
+        uint32_t width;
+        uint32_t height;
+        m_pApp->Selector_GetDisplayDimensions(&width, &height);
+
+        // TODO: account for current camera position
+        newSelectedCardPosition[0] += kInitialCardWidth / 2.f - static_cast<float>(width) / 2.f;
+        newSelectedCardPosition[1] += kInitialCardHeight / 2.f - static_cast<float>(height) / 2.f;
+        newSelectedCardPosition[2] = 1.f;
+        m_pApp->Selector_SetCameraTarget(newSelectedCardPosition);
+    }
+}
+
+void CarouselSelector::SnapCameraToCard(uint32_t cardIndex)
+{
+    glm::vec3 newSelectedCardPosition;
+    if (m_pApp->Selector_GetCardPosition(cardIndex, &newSelectedCardPosition))
+    {
+        uint32_t width;
+        uint32_t height;
+        m_pApp->Selector_GetDisplayDimensions(&width, &height);
+
+        // TODO: account for current camera position
+        newSelectedCardPosition[0] += kInitialCardWidth / 2.f - static_cast<float>(width) / 2.f;
+        newSelectedCardPosition[1] += kInitialCardHeight / 2.f - static_cast<float>(height) / 2.f;
+        newSelectedCardPosition[2] = 1.f;
+        m_pApp->Selector_SetCameraPosition(newSelectedCardPosition);
     }
 }

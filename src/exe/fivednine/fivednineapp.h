@@ -37,9 +37,13 @@ class fivednineApp
         void Selector_GetDisplayDimensions(uint32_t* pWidthOut, uint32_t* pHeightOut);
         bool Selector_GetCardGameInfo(uint32_t index, GameInfo* pGameInfoOut);
         bool Selector_SetCardAppearanceParam1f(uint32_t index, const char* pParameterName, float* pValue);
+        bool Selector_GetCardPosition(uint32_t index, glm::vec3* pCardPositionOut);
         bool Selector_SetCardPosition(uint32_t index, float x, float y, float z);
         bool Selector_SetCardDimensions(uint32_t index, float width, float height);
         bool Selector_SetCardTexture(uint32_t index, const char* pTextureName);
+
+        void Selector_SetCameraPosition(const glm::vec3& position);
+        void Selector_SetCameraTarget(const glm::vec3& target);
 
     private:
         bool LoadTextures(const AppConfig& configuration);

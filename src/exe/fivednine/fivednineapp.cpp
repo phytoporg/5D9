@@ -131,6 +131,7 @@ void fivednineApp::Tick(float dtSeconds)
 {
     RELEASE_CHECK(m_isInitialized, "Attempting to tick app without having initialized");
     m_spSelector->Tick(dtSeconds);
+    m_camera.Tick(dtSeconds);
 }
 
 void fivednineApp::Draw()
@@ -470,6 +471,24 @@ bool fivednineApp::Selector_SetCardAppearanceParam1f(uint32_t index, const char*
     return false;
 }
 
+bool fivednineApp::Selector_GetCardPosition(uint32_t index, glm::vec3* pCardPositionOut)
+{
+    if (index > m_numGameInfos)
+    {
+        RELEASE_LOGLINE_ERROR(LOG_API, "Game card index out of bounds: %u", index);
+        return false;
+    }
+    
+    if (!pCardPositionOut)
+    {
+        RELEASE_LOGLINE_ERROR(LOG_API, "pCardPosition cannot be null");
+        return false;
+    }
+
+    *pCardPositionOut = m_gameCards[index]->GetPosition();
+    return true;
+}
+
 bool fivednineApp::Selector_SetCardPosition(uint32_t index, float x, float y, float z)
 {
     if (index > m_numGameInfos)
@@ -511,6 +530,16 @@ bool fivednineApp::Selector_SetCardTexture(uint32_t index, const char* pTextureN
 
     m_gameCards[index]->SetTexture(spTexture);
     return true;
+}
+
+void fivednineApp::Selector_SetCameraTarget(const glm::vec3& target)
+{
+    m_camera.SetTranslationTarget(target);
+}
+
+void fivednineApp::Selector_SetCameraPosition(const glm::vec3& position)
+{
+    m_camera.SetTranslation(position);
 }
 
 void 

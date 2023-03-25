@@ -34,12 +34,13 @@ namespace fivednine { namespace render {
             Q
         };
 
-        static constexpr uint32_t DEFAULT_WINDOW_WIDTH = 1024;
-        static constexpr uint32_t DEFAULT_WINDDOW_HEIGHT = 768;
+        static constexpr uint32_t kDefaultWindowWidth = 1024;
+        static constexpr uint32_t kDefaultWindowHeight = 768;
         Window(
             const char* pWindowName = nullptr,
-            uint32_t width = DEFAULT_WINDOW_WIDTH,
-            uint32_t height = DEFAULT_WINDDOW_HEIGHT);
+            uint32_t width = kDefaultWindowWidth,
+            uint32_t height = kDefaultWindowHeight,
+            bool fullScreen = true);
         ~Window();
 
         EventType PollEvents() const;

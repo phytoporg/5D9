@@ -46,17 +46,24 @@ namespace
     }
 }
 
-Window::Window(const char* pWindowName, uint32_t width, uint32_t height)
+Window::Window(const char* pWindowName, uint32_t width, uint32_t height, bool fullScreen)
 {
     RELEASE_CHECK(pWindowName != nullptr, "Window requires a name");
 
+    SDL_ShowCursor(SDL_DISABLE);
+
+    Uint32 CreateWindowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
+    if (fullScreen)
+    {
+        CreateWindowFlags |= SDL_WINDOW_FULLSCREEN;
+    }
     m_pWindow = SDL_CreateWindow(
             pWindowName,
             SDL_WINDOWPOS_UNDEFINED,
             SDL_WINDOWPOS_UNDEFINED,
             width,
             height,
-            SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL /* | SDL_WINDOW_FULLSCREEN */); // Disable full screen for the moment
+            CreateWindowFlags);
     RELEASE_CHECK(
         m_pWindow != nullptr,
         "Failed to create SDL window %s: %s", pWindowName, SDL_GetError());
@@ -64,7 +71,6 @@ Window::Window(const char* pWindowName, uint32_t width, uint32_t height)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
 
     SDL_GLContext context = SDL_GL_CreateContext(m_pWindow);
     if (SDL_GL_MakeCurrent(m_pWindow, context) < 0)

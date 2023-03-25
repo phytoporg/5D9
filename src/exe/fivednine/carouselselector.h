@@ -2,6 +2,7 @@
 
 #include "selectorevent.h"
 #include <cstddef>
+#include <cstdint>
 
 struct GameInfo;
 class  EventPump;
@@ -17,6 +18,8 @@ public:
 
 private:
     void HandleInputEvent(const SelectorInputEventPayload& inputEventPayload);
+    void MoveCameraToCard(uint32_t cardIndex);
+    void SnapCameraToCard(uint32_t cardIndex);
 
     fivednineApp* m_pApp = nullptr;
     EventPump*    m_pEventPump = nullptr;

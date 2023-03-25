@@ -61,6 +61,11 @@ void GameCard::SetPosition(float x, float y, float z)
     modelMatrix[3] = glm::vec4(x, y, z, 1.f);
 }
 
+glm::vec3 GameCard::GetPosition() const
+{
+    return m_cardMesh.GetModelMatrix()[3];
+}
+
 void GameCard::SetDimensions(float width, float height)
 {
     // Diagonal *= scale vector (z-axis scale is unity)

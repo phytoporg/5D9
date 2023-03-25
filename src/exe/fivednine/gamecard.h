@@ -17,6 +17,7 @@ public:
     void Draw(const glm::mat4& projMatrix, const glm::mat4& viewMatrix);
 
     void SetPosition(float x, float y, float z);
+    glm::vec3 GetPosition() const;
     void SetDimensions(float width, float height);
 
     fivednine::render::TexturePtr GetTexture() const;

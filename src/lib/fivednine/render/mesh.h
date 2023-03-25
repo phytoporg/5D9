@@ -56,6 +56,7 @@ namespace fivednine { namespace render {
             bool SetShader(ShaderPtr spShader);
             void SetModelMatrix(const glm::mat4& modelMatrix);
             glm::mat4& GetModelMatrix();
+            const glm::mat4& GetModelMatrix() const;
 
             void SetTexture(TexturePtr spTexture);
             TexturePtr GetTexture() const;

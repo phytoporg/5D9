@@ -187,6 +187,11 @@ glm::mat4& Mesh::GetModelMatrix()
     return m_ModelMatrix;
 }
 
+const glm::mat4& Mesh::GetModelMatrix() const
+{
+    return m_ModelMatrix;
+}
+
 void Mesh::SetTexture(TexturePtr spTexture)
 {
     m_spTexture = spTexture;
