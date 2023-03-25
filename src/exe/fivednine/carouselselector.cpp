@@ -48,7 +48,7 @@ bool CarouselSelector::Initialize()
         
         // We're using 600x900 textures for the carousel
         const std::string CardTexture = gameInfo.TexturePrefix + "_600x900";
-        m_pApp->Selector_SetCardTexture(i, CardTexture.c_str()); // TODO: per-game texture
+        m_pApp->Selector_SetCardTexture(i, CardTexture.c_str());
     }
 
     m_pApp->Selector_SelectIndex(MiddleCardIndex);
