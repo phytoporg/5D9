@@ -4,7 +4,15 @@
 - Draw basic textured quads
 - Basic carousel selector
 - Keyboard navigation
+
 * Process management solution
+** Stand up a basic daemon
+** Establish a *very* simple IPC messaging protocol:
+*** Start launcher
+*** Swap launcher & game (process suspend/resume/termination is implicit)
+** Daemon games/processes are configurable
+*** Add support for game config query messages
+
 * Controller navigation
 * Implement "selector" API via dynlib
 * Hot-loadable selector implementation
