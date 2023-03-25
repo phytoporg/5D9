@@ -75,10 +75,10 @@ TextureStorage::AddTexture(
     glBindTexture(GL_TEXTURE_2D, textureId);
 
     // Scale linearly when image is larger than texture
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR); 
 
     // Scale linearly when image is smaller than texture
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); 
 
     glPixelStorei(GL_PACK_ALIGNMENT, 1); 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); 
