@@ -51,6 +51,7 @@ GameCard::GameCard(ShaderPtr spShader)
 
 void GameCard::Draw(const glm::mat4& projMatrix, const glm::mat4& viewMatrix)
 {
+    m_cardMesh.SetMeshUniforms(m_uniformValues);
     m_cardMesh.Draw(projMatrix, viewMatrix);
 }
 
@@ -76,4 +77,20 @@ TexturePtr GameCard::GetTexture() const
 void GameCard::SetTexture(TexturePtr spTexture)
 {
     m_cardMesh.SetTexture(spTexture);
+}
+
+void GameCard::SetUniformValue1f(const char* pUniformName, float* pValue)
+{
+    auto it = std::find_if(std::begin(m_uniformValues), std::end(m_uniformValues),
+        [pUniformName](const MeshUniformValue& uniformValue) -> bool
+        {
+            return uniformValue.Name == pUniformName;
+        });
+    if (it == std::end(m_uniformValues))
+    {
+        m_uniformValues.emplace_back(pUniformName, UniformType::Float, pValue);
+        return;
+    }
+
+    it->pValue = pValue;
 }

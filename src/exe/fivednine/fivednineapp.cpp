@@ -441,6 +441,11 @@ void fivednineApp::Selector_ConfirmCurrentSelection()
     // TODO
 }
 
+void fivednineApp::Selector_GetDisplayDimensions(uint32_t* pWidthOut, uint32_t* pHeightOut)
+{
+    m_pWindow->GetWindowDimensions(pWidthOut, pHeightOut);
+}
+
 bool fivednineApp::Selector_GetCardGameInfo(uint32_t index, GameInfo* pGameInfoOut)
 {
     if (!pGameInfoOut)
@@ -459,7 +464,7 @@ bool fivednineApp::Selector_GetCardGameInfo(uint32_t index, GameInfo* pGameInfoO
     return true;
 }
 
-bool fivednineApp::Selector_SetCardAppearanceParam1f(uint32_t index, const char* pParameterName, float value)
+bool fivednineApp::Selector_SetCardAppearanceParam1f(uint32_t index, const char* pParameterName, float *pValue)
 {
     if (index > m_numGameInfos)
     {
@@ -467,7 +472,7 @@ bool fivednineApp::Selector_SetCardAppearanceParam1f(uint32_t index, const char*
         return false;
     }
 
-    // TODO: expose uniforms for game card
+    m_gameCards[index]->SetUniformValue1f(pParameterName, pValue);
     return false;
 }
 

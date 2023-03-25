@@ -206,6 +206,11 @@ void Mesh::SetMeshUniforms(const std::initializer_list<MeshUniformValue>& unifor
     }
 }
 
+void Mesh::SetMeshUniforms(const std::vector<MeshUniformValue>& uniformValues)
+{
+    m_MeshUniformValues = uniformValues;
+}
+
 void Mesh::Draw(const glm::mat4& projMatrix, const glm::mat4& viewMatrix) 
 {
     if (!GetVisibility())

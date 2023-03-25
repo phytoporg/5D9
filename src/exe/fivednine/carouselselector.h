@@ -15,8 +15,6 @@ public:
     void Tick(float dtSeconds);
 
 private:
-    void DoSelectIndex(uint32_t selectedIndex);
-
     fivednineApp* m_pApp = nullptr;
     EventPump*    m_pEventPump = nullptr;
 };

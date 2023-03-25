@@ -62,6 +62,7 @@ namespace fivednine { namespace render {
 
             // To be set for each draw call
             void SetMeshUniforms(const std::initializer_list<MeshUniformValue>& uniformValues);
+            void SetMeshUniforms(const std::vector<MeshUniformValue>& uniformValues);
 
             void Draw(const glm::mat4& projMatrix, const glm::mat4& viewMatrix);
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include <glm/glm.hpp>
 
@@ -13,19 +14,6 @@ class GameCard
 public:
     GameCard(fivednine::render::ShaderPtr spShader);
 
-// TODO: REMOVE ME ONCE PROTOTYPE IS DONE
-    GameCard(
-        fivednine::render::ShaderPtr spShader,
-        fivednine::render::TexturePtr spTexture);
-
-    GameCard(
-        fivednine::render::ShaderPtr spShader,
-        fivednine::render::TexturePtr spTexture,
-        const glm::vec3& upperLeft,
-        uint32_t width,
-        uint32_t height);
-// TODO: REMOVE ME ONCE PROTOTYPE IS DONE^^^
-
     void Draw(const glm::mat4& projMatrix, const glm::mat4& viewMatrix);
 
     void SetPosition(float x, float y, float z);
@@ -33,12 +21,14 @@ public:
 
     fivednine::render::TexturePtr GetTexture() const;
     void SetTexture(fivednine::render::TexturePtr spTexture);
+    void SetUniformValue1f(const char* pUniformName, float* pValue);
 
 private:
     GameCard() = delete;
     GameCard(const GameCard& other) = delete;
 
-    fivednine::render::Mesh       m_cardMesh;
+    fivednine::render::Mesh                          m_cardMesh;
+    std::vector<fivednine::render::MeshUniformValue> m_uniformValues;
 
     // All game cards are fundamentally textured unit quads.
     // TODO: instanced rendering for game cards
