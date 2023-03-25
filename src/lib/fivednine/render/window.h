@@ -40,7 +40,7 @@ namespace fivednine { namespace render {
             const char* pWindowName = nullptr,
             uint32_t width = kDefaultWindowWidth,
             uint32_t height = kDefaultWindowHeight,
-            bool fullScreen = true);
+            bool fullScreen = false); // Temporarily disabling for development & iteration
         ~Window();
 
         EventType PollEvents() const;
