@@ -39,23 +39,8 @@ int main(int argc, char** argv)
     }
 
     Window window("shotOS game selection carousel");
-    window.SetKeyStateChangedHandler(
-        [](Window::EventType eventType, Window::KeyType keyType, void* pUserPointer)
-        {
-            if (eventType == Window::EventType::KeyDown &&
-                keyType == Window::KeyType::Q &&
-                pUserPointer)
-            {
-                Window* pWindow = static_cast<Window*>(pUserPointer);
-                pWindow->Quit();
-            }
-        });
-    window.SetUserPointer(&window);
-
-    // boo, gross
     fivednineApp app;
-    app.SetWindow(&window);
-    if (!app.Initialize(appConfig))
+    if (!app.Initialize(appConfig, &window))
     {
         RELEASE_LOG_ERROR(LOG_DEFAULT, "Failed to initialize app");
         return -1;

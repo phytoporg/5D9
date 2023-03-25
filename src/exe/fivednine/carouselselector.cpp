@@ -58,5 +58,55 @@ bool CarouselSelector::Initialize()
 
 void CarouselSelector::Tick(float dtSeconds)
 {
-    // TODO
+    SelectorEvent event;
+    while (m_pEventPump->GetNextEvent(&event))
+    {
+        switch(event.EventType)
+        {
+            case SelectorEventType::Input:
+                HandleInputEvent(event.EventPayload.InputEventPayload);
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+void CarouselSelector::HandleInputEvent(const SelectorInputEventPayload& inputEventPayload)
+{
+    switch(inputEventPayload.InputEventType)
+    {
+        case SelectorInputEventType::NextSelection:
+        {
+            const uint32_t NumCards = m_pApp->Selector_GetNumCards();
+            const uint32_t CurrentCardIndex = m_pApp->Selector_GetSelectedIndex();
+
+            if (CurrentCardIndex < (NumCards - 1))
+            {
+                const uint32_t NewSelectedIndex = CurrentCardIndex + 1;
+                m_pApp->Selector_SelectIndex(NewSelectedIndex);
+                m_pApp->Selector_SetCardAppearanceParam1f(CurrentCardIndex, "tint", &Tinted);
+                m_pApp->Selector_SetCardAppearanceParam1f(NewSelectedIndex, "tint", &UnTinted);
+            }
+        }
+            break;
+        case SelectorInputEventType::PreviousSelection:
+        {
+            const uint32_t CurrentCardIndex = m_pApp->Selector_GetSelectedIndex();
+
+            if (CurrentCardIndex > 0)
+            {
+                const uint32_t NewSelectedIndex = CurrentCardIndex - 1;
+                m_pApp->Selector_SelectIndex(NewSelectedIndex);
+                m_pApp->Selector_SetCardAppearanceParam1f(CurrentCardIndex, "tint", &Tinted);
+                m_pApp->Selector_SetCardAppearanceParam1f(NewSelectedIndex, "tint", &UnTinted);
+            }
+        }
+            break;
+        case SelectorInputEventType::ConfirmCurrent:
+            // TODO
+            break;
+        default:
+            break;
+    }
 }

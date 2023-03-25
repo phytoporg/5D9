@@ -64,8 +64,11 @@ namespace
     }
 }
 
-bool fivednineApp::Initialize(const AppConfig& configuration)
+bool fivednineApp::Initialize(const AppConfig& configuration, Window* pWindow)
 {
+    RELEASE_CHECK(pWindow, "pWindow cannot be null");
+    m_pWindow = pWindow;
+
     if (!configuration.GetIsParsed())
     {
         RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Configuration has not been parsed.");
@@ -123,18 +126,18 @@ bool fivednineApp::Initialize(const AppConfig& configuration)
         return false;
     }
 
+    // TODO: Factor out all of the input goo
+    m_pWindow->SetKeyStateChangedHandler(HandleKeypress);
+    m_pWindow->SetUserPointer(this);
+
     m_isInitialized = true;
     return true;
-}
-
-void fivednineApp::SetWindow(fivednine::render::Window* pWindow)
-{
-    m_pWindow = pWindow;
 }
 
 void fivednineApp::Tick(float dtSeconds)
 {
     RELEASE_CHECK(m_isInitialized, "Attempting to tick app without having initialized");
+    m_spSelector->Tick(dtSeconds);
 }
 
 void fivednineApp::Draw()
@@ -517,4 +520,50 @@ bool fivednineApp::Selector_SetCardTexture(uint32_t index, const char* pTextureN
 
     m_gameCards[index]->SetTexture(spTexture);
     return true;
+}
+
+void 
+fivednineApp::HandleKeypress(
+    Window::EventType eventType,
+    Window::KeyType keyType,
+    void* pUserPointer)
+{
+    if (eventType == Window::EventType::KeyDown && pUserPointer)
+    {
+        switch (keyType)
+        {
+            case Window::KeyType::Q:
+            {
+                Window* pWindow = static_cast<fivednineApp*>(pUserPointer)->m_pWindow;
+                pWindow->Quit();
+                break;
+            }
+            case Window::KeyType::Left:
+                // fallthrough
+            case Window::KeyType::A:
+            {
+                EventPump& eventPump = static_cast<fivednineApp*>(pUserPointer)->m_selectorEventPump;
+
+                SelectorEvent event;
+                event.EventType = SelectorEventType::Input;
+                event.EventPayload.InputEventPayload.InputEventType = SelectorInputEventType::PreviousSelection;
+                eventPump.PostEvent(event);
+                break;
+            }
+            case Window::KeyType::Right:
+                // fallthrough
+            case Window::KeyType::D:
+            {
+                EventPump& eventPump = static_cast<fivednineApp*>(pUserPointer)->m_selectorEventPump;
+
+                SelectorEvent event;
+                event.EventType = SelectorEventType::Input;
+                event.EventPayload.InputEventPayload.InputEventType = SelectorInputEventType::NextSelection;
+                eventPump.PostEvent(event);
+                break;
+            }
+            default:
+                break;
+        }
+    }
 }

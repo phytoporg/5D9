@@ -30,8 +30,16 @@ namespace
     {
         switch (sdlKeyType)
         {
+            case SDLK_a:
+                return Window::KeyType::A;
+            case SDLK_d:
+                return Window::KeyType::D;
             case SDLK_q:
                 return Window::KeyType::Q;
+            case SDLK_LEFT:
+                return Window::KeyType::Left;
+            case SDLK_RIGHT:
+                return Window::KeyType::Right;
             default:
                 return Window::KeyType::Invalid;
         }

@@ -27,6 +27,10 @@ namespace fivednine { namespace render {
         enum class KeyType
         {
             Invalid = 0,
+            Left,
+            Right,
+            A,
+            D,
             Q
         };
 

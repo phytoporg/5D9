@@ -1,5 +1,6 @@
 #pragma once
 
+#include "selectorevent.h"
 #include <cstddef>
 
 struct GameInfo;
@@ -15,6 +16,8 @@ public:
     void Tick(float dtSeconds);
 
 private:
+    void HandleInputEvent(const SelectorInputEventPayload& inputEventPayload);
+
     fivednineApp* m_pApp = nullptr;
     EventPump*    m_pEventPump = nullptr;
 };

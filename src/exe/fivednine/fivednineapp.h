@@ -12,23 +12,15 @@
 
 #include <glm/glm.hpp>
 
+#include <fivednine/render/window.h>
 #include <fivednine/render/texturestorage.h>
 #include <fivednine/render/shaderstorage.h>
-
-namespace fivednine 
-{
-    namespace render 
-    {
-        class Window;
-    }
-}
 
 class AppConfig;
 class fivednineApp
 {
     public:
-        bool Initialize(const AppConfig& configuration);
-        void SetWindow(fivednine::render::Window* pWindow);
+        bool Initialize(const AppConfig& configuration, fivednine::render::Window* pWindow);
 
         void Tick(float dtSeconds);
         void Draw();
@@ -52,6 +44,12 @@ class fivednineApp
         bool LoadTextures(const AppConfig& configuration);
         bool LoadShaders(const AppConfig& configuration);
         bool LoadGamesInfo(const AppConfig& configuration);
+
+        static void 
+        HandleKeypress(
+            fivednine::render::Window::EventType eventType,
+            fivednine::render::Window::KeyType keyType,
+            void* pUserPointer);
 
     private:
         bool                       m_isInitialized = false;
