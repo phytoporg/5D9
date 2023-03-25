@@ -90,7 +90,7 @@ bool fivednineApp::Initialize(const AppConfig& configuration, Window* pWindow)
         return false;
     }
 
-    // Initialize view & projection matrices
+    // Initialize projection matrix
     // TODO: Decouple from window size
     uint32_t windowWidth, windowHeight;
     m_pWindow->GetWindowDimensions(&windowWidth, &windowHeight);
@@ -100,15 +100,8 @@ bool fivednineApp::Initialize(const AppConfig& configuration, Window* pWindow)
         0.1f, 1000.f
     );
 
-    // TODO: Implement real camera abstraction
-    glm::vec3 cameraPosition(windowWidth / -2.f, windowHeight / -2.f, 1.f);
-    glm::vec3 cameraForward(0.f, 0.f, -1.f);
-    glm::vec3 cameraUp(0.f, 1.f, 0.f);
-    m_viewMatrix = glm::lookAt(
-        cameraPosition,
-        cameraPosition + cameraForward,
-        cameraUp
-    );
+    // Initialize camera
+    m_camera.SetTranslation(glm::vec3(windowWidth / -2.f, windowHeight / -2.f, 1.f));
 
     // Initialize game cards
     ShaderPtr spGameCardShader = m_shaderStorage.FindShaderByName("gamecard");
@@ -143,11 +136,9 @@ void fivednineApp::Tick(float dtSeconds)
 void fivednineApp::Draw()
 {
     RELEASE_CHECK(m_isInitialized, "Attempting to draw app without having initialized");
-    // m_spGameCard->Draw(m_projectionMatrix, m_viewMatrix);
-
     for (auto spGameCard : m_gameCards)
     {
-        spGameCard->Draw(m_projectionMatrix, m_viewMatrix);
+        spGameCard->Draw(m_projectionMatrix, m_camera.ViewMatrix4());
     }
 }
 

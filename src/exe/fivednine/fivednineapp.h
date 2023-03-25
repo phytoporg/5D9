@@ -13,6 +13,7 @@
 #include <glm/glm.hpp>
 
 #include <fivednine/render/window.h>
+#include <fivednine/render/camera.h>
 #include <fivednine/render/texturestorage.h>
 #include <fivednine/render/shaderstorage.h>
 
@@ -56,9 +57,9 @@ class fivednineApp
         fivednine::render::Window* m_pWindow = nullptr;
         fivednine::render::TextureStorage m_textureStorage;
         fivednine::render::ShaderStorage  m_shaderStorage;
+        fivednine::render::Camera         m_camera;
 
         glm::mat4 m_projectionMatrix;
-        glm::mat4 m_viewMatrix; // TODO: Replace with camera
 
         // TODO: factor app state into common structure
         // TODO: static array container
