@@ -8,4 +8,4 @@ file(GLOB SOURCES *.cpp)
 add_executable(${TARGETNAME} ${SOURCES})
 
 target_link_libraries(${TARGETNAME}
-    common)
+    commonlib)

@@ -10,6 +10,8 @@ namespace common { namespace cli {
     public:
         CommandLineArgumentParser(int argc, char** argv);
 
+        std::string GetArgument(const std::string& argumentName, const std::string& defaultValue = "") const;
+
         const CommandLineArgument* FindArgument(const std::string& argumentName) const;
 
     private:

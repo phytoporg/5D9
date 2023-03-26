@@ -41,6 +41,17 @@ CommandLineArgumentParser::CommandLineArgumentParser(int argc, char** argv)
     }
 }
 
+std::string CommandLineArgumentParser::GetArgument(const std::string& argumentName, const std::string& defaultValue) const
+{
+    const CommandLineArgument* pArgument = FindArgument(argumentName);
+    if (pArgument)
+    {
+        return pArgument->AsString();
+    }
+
+    return defaultValue;
+}
+
 const CommandLineArgument* CommandLineArgumentParser::FindArgument(const std::string& argumentName) const
 {
     for (const CommandLineArgument& argument : m_parsedArguments)
