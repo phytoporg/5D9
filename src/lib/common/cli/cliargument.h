@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace fivednine { namespace cli {
+namespace common { namespace cli {
     class CommandLineArgument
     {
     public:

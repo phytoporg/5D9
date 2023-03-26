@@ -4,7 +4,7 @@
 
 #include "cliargument.h"
 
-namespace fivednine { namespace cli {
+namespace common { namespace cli {
     class CommandLineArgumentParser
     {
     public:

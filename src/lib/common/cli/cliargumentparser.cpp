@@ -4,8 +4,8 @@
 
 #include <cstring>
 
-using namespace fivednine;
-using namespace fivednine::cli;
+using namespace common;
+using namespace common::cli;
 
 CommandLineArgumentParser::CommandLineArgumentParser(int argc, char** argv)
 {

@@ -1,7 +1,7 @@
 #include "cliargument.h"
 
-using namespace fivednine;
-using namespace fivednine::cli;
+using namespace common;
+using namespace common::cli;
 
 CommandLineArgument::CommandLineArgument(const std::string& argumentName, const std::string& argumentValue)
     : m_name(argumentName), m_value(argumentValue) {}

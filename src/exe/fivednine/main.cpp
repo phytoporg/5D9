@@ -1,14 +1,17 @@
 #include "fivednineapp.h"
 #include "appconfig.h"
 
-#include <fivednine/cli/cliargumentparser.h>
+#include <common/cli/cliargumentparser.h>
+
 #include <fivednine/log/log.h>
 #include <fivednine/render/window.h>
 #include <fivednine/render/color.h>
 #include <fivednine/system/time.h>
 
+using namespace common;
+using namespace common::cli;
+
 using namespace fivednine;
-using namespace fivednine::cli;
 using namespace fivednine::render;
 using namespace fivednine::system;
 
