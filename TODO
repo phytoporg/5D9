@@ -6,7 +6,9 @@
 - Keyboard navigation
 
 * Process management solution
-** Stand up a basic daemon
+** Stand up a basic daemon 
+** Port logging over to common lib
+** Daemon starts launcher
 ** Establish a *very* simple IPC messaging protocol:
 *** Start launcher
 *** Swap launcher & game (process suspend/resume/termination is implicit)
