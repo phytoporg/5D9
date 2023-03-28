@@ -5,5 +5,6 @@ include_directories(
 
 file(GLOB SOURCES 
     log/*.cpp
+    ipc/*.cpp
     cli/*.cpp)
 add_library(commonlib ${SOURCES})
