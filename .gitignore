@@ -53,9 +53,14 @@ dkms.conf
 
 # Cmake
 /build
+/cmake-build-debug
+CMakeLists.txt.user
 
 # vscode
 /.vscode
 
 # clangd
 /.cache
+
+# Jetbrains
+/.idea
