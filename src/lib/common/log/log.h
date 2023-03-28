@@ -9,7 +9,7 @@
 
 #include <cstdint>
 
-namespace fivednine { namespace log {
+namespace common { namespace log {
     enum class LogVerbosity 
     {
         Fatal = 0,
@@ -22,13 +22,7 @@ namespace fivednine { namespace log {
     };
     static const LogVerbosity kDefaultLogVerbosity = LogVerbosity::Warning;
 
-    enum class LogZone 
-    {
-        Default = 0,
-        Render,
-        API,
-        Max
-    };
+    using LogZone = uint32_t;
 
     // Log configuration
     void SetLogVerbosity(LogVerbosity newLogVerbosity);
@@ -37,6 +31,8 @@ namespace fivednine { namespace log {
     bool SetLogFile(const char* pLogFilePath);
 
     // All zones enabled by default
+    bool RegisterLogZone(uint32_t zoneIndex, bool zoneEnabled, const char* pZoneName);
+
     void DisableZone(LogZone zone);
     void EnableZone(LogZone zone);
     bool GetIsZoneEnabled(LogZone zone);
@@ -53,30 +49,30 @@ namespace fivednine { namespace log {
 // Debug
 #if defined(DEBUG)
     #define DEBUG_LOG_FATAL(Zone, String, ...) \
-        fivednine::log::LogAndFail(Zone, String, __VA_ARGS__);
+        common::log::LogAndFail(Zone, String, __VA_ARGS__);
     #define DEBUG_LOG_ERROR(Zone, String, ...) \
-        fivednine::log::Log(Zone, fivednine::log::LogVerbosity::Error, String, __VA_ARGS__);
+        common::log::Log(Zone, common::log::LogVerbosity::Error, String, __VA_ARGS__);
     #define DEBUG_LOG_WARNING(Zone, String, ...) \
-        fivednine::log::Log(Zone, fivednine::log::LogVerbosity::Warning, String, __VA_ARGS__);
+        common::log::Log(Zone, common::log::LogVerbosity::Warning, String, __VA_ARGS__);
     #define DEBUG_LOG_INFO(Zone, String, ...) \
-        fivednine::log::Log(Zone, fivednine::log::LogVerbosity::Info, String, __VA_ARGS__);
+        common::log::Log(Zone, common::log::LogVerbosity::Info, String, __VA_ARGS__);
     #define DEBUG_LOG_VERBOSE(Zone, String, ...) \
-        fivednine::log::Log(Zone, fivednine::log::LogVerbosity::Verbose, String, __VA_ARGS__);
+        common::log::Log(Zone, common::log::LogVerbosity::Verbose, String, __VA_ARGS__);
     #define DEBUG_LOG_VERYVERBOSE(Zone, String, ...) \
-        fivednine::log::Log(Zone, fivednine::log::LogVerbosity::VeryVerbose, String, __VA_ARGS__);
+        common::log::Log(Zone, common::log::LogVerbosity::VeryVerbose, String, __VA_ARGS__);
 
     #define DEBUG_LOGLINE_FATAL(Zone, String, ...) \
-        fivednine::log::LogLineAndFail(Zone, String, __VA_ARGS__);
+        common::log::LogLineAndFail(Zone, String, __VA_ARGS__);
     #define DEBUG_LOGLINE_ERROR(Zone, String, ...) \
-        fivednine::log::LogLine(Zone, fivednine::log::LogVerbosity::Error, String, __VA_ARGS__);
+        common::log::LogLine(Zone, common::log::LogVerbosity::Error, String, __VA_ARGS__);
     #define DEBUG_LOGLINE_WARNING(Zone, String, ...) \
-        fivednine::log::LogLine(Zone, fivednine::log::LogVerbosity::Warning, String, __VA_ARGS__);
+        common::log::LogLine(Zone, common::log::LogVerbosity::Warning, String, __VA_ARGS__);
     #define DEBUG_LOGLINE_INFO(Zone, String, ...) \
-        fivednine::log::LogLine(Zone, fivednine::log::LogVerbosity::Info, String, __VA_ARGS__);
+        common::log::LogLine(Zone, common::log::LogVerbosity::Info, String, __VA_ARGS__);
     #define DEBUG_LOGLINE_VERBOSE(Zone, String, ...) \
-        fivednine::log::LogLine(Zone, fivednine::log::LogVerbosity::Verbose, String, __VA_ARGS__);
+        common::log::LogLine(Zone, common::log::LogVerbosity::Verbose, String, __VA_ARGS__);
     #define DEBUG_LOGLINE_VERYVERBOSE(Zone, String, ...) \
-        fivednine::log::LogLine(Zone, fivednine::log::LogVerbosity::VeryVerbose, String, __VA_ARGS__);
+        common::log::LogLine(Zone, common::log::LogVerbosity::VeryVerbose, String, __VA_ARGS__);
 #else
     #define DEBUG_LOG_FATAL(Zone, String, ...) 
     #define DEBUG_LOG_ERROR(Zone, String, ...) 
@@ -95,31 +91,32 @@ namespace fivednine { namespace log {
 
 // Release
 #define RELEASE_LOG_FATAL(Zone, String, ...) \
-    fivednine::log::LogAndFail(Zone, String __VA_OPT__(,) __VA_ARGS__)
+    common::log::LogAndFail(Zone, String __VA_OPT__(,) __VA_ARGS__)
 #define RELEASE_LOG_ERROR(Zone, String, ...) \
-    fivednine::log::Log(Zone, fivednine::log::LogVerbosity::Error, String __VA_OPT__(,) __VA_ARGS__)
+    common::log::Log(Zone, common::log::LogVerbosity::Error, String __VA_OPT__(,) __VA_ARGS__)
 #define RELEASE_LOG_WARNING(Zone, String, ...) \
-    fivednine::log::Log(Zone, fivednine::log::LogVerbosity::Warning, String __VA_OPT__(,) __VA_ARGS__)
+    common::log::Log(Zone, common::log::LogVerbosity::Warning, String __VA_OPT__(,) __VA_ARGS__)
 #define RELEASE_LOG_INFO(Zone, String, ...) \
-    fivednine::log::Log(Zone, fivednine::log::LogVerbosity::Info, String __VA_OPT__(,) __VA_ARGS__)
+    common::log::Log(Zone, common::log::LogVerbosity::Info, String __VA_OPT__(,) __VA_ARGS__)
 #define RELEASE_LOG_VERBOSE(Zone, String, ...) \
-    fivednine::log::Log(Zone, fivednine::log::LogVerbosity::Verbose, String __VA_OPT__(,) __VA_ARGS__)
+    common::log::Log(Zone, common::log::LogVerbosity::Verbose, String __VA_OPT__(,) __VA_ARGS__)
 #define RELEASE_LOG_VERYVERBOSE(Zone, String, ...) \
-    fivednine::log::Log(Zone, fivednine::log::LogVerbosity::VeryVerbose, String __VA_OPT__(,) __VA_ARGS__)
+    common::log::Log(Zone, common::log::LogVerbosity::VeryVerbose, String __VA_OPT__(,) __VA_ARGS__)
 
 #define RELEASE_LOGLINE_FATAL(Zone, String, ...) \
-    fivednine::log::LogLineAndFail(Zone, String __VA_OPT__(,) __VA_ARGS__)
+    common::log::LogLineAndFail(Zone, String __VA_OPT__(,) __VA_ARGS__)
 #define RELEASE_LOGLINE_ERROR(Zone, String, ...) \
-    fivednine::log::LogLine(Zone, fivednine::log::LogVerbosity::Error, String __VA_OPT__(,) __VA_ARGS__)
+    common::log::LogLine(Zone, common::log::LogVerbosity::Error, String __VA_OPT__(,) __VA_ARGS__)
 #define RELEASE_LOGLINE_WARNING(Zone, String, ...) \
-    fivednine::log::LogLine(Zone, fivednine::log::LogVerbosity::Warning, String __VA_OPT__(,) __VA_ARGS__)
+    common::log::LogLine(Zone, common::log::LogVerbosity::Warning, String __VA_OPT__(,) __VA_ARGS__)
 #define RELEASE_LOGLINE_INFO(Zone, String, ...) \
-    fivednine::log::LogLine(Zone, fivednine::log::LogVerbosity::Info, String __VA_OPT__(,) __VA_ARGS__)
+    common::log::LogLine(Zone, common::log::LogVerbosity::Info, String __VA_OPT__(,) __VA_ARGS__)
 #define RELEASE_LOGLINE_VERBOSE(Zone, String, ...) \
-    fivednine::log::LogLine(Zone, fivednine::log::LogVerbosity::Verbose, String __VA_OPT__(,) __VA_ARGS__)
+    common::log::LogLine(Zone, common::log::LogVerbosity::Verbose, String __VA_OPT__(,) __VA_ARGS__)
 #define RELEASE_LOGLINE_VERYVERBOSE(Zone, String, ...) \
-    fivednine::log::LogLine(Zone, fivednine::log::LogVerbosity::VeryVerbose, String __VA_OPT__(,) __VA_ARGS__)
+    common::log::LogLine(Zone, common::log::LogVerbosity::VeryVerbose, String __VA_OPT__(,) __VA_ARGS__)
 
-#define LOG_DEFAULT fivednine::log::LogZone::Default
-#define LOG_RENDER fivednine::log::LogZone::Render
-#define LOG_API fivednine::log::LogZone::API
+// Default-available library zones
+#define LOG_DEFAULT 0
+#define LOG_RENDER  1
+#define LOG_API     2

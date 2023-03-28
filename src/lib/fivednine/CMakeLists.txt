@@ -5,7 +5,6 @@ include_directories(
     ${SDL2_INCLUDE_DIRS})
 
 file(GLOB SOURCES 
-    log/*.cpp
     render/*.cpp
     system/*.cpp)
 add_library(fivedninelib ${SOURCES})

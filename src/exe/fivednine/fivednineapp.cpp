@@ -11,9 +11,10 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <common/log/log.h>
+#include <common/log/check.h>
+
 #include <fivednine/render/window.h>
-#include <fivednine/log/log.h>
-#include <fivednine/log/check.h>
 
 using json = nlohmann::json;
 using namespace fivednine;

@@ -1,8 +1,9 @@
 #include "window.h"
 #include "color.h"
 #include "rendercommon.h"
-#include <fivednine/log/log.h>
-#include <fivednine/log/check.h>
+
+#include <common/log/log.h>
+#include <common/log/check.h>
 
 #include <SDL.h>
 

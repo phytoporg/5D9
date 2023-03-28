@@ -2,8 +2,8 @@
 #include "appconfig.h"
 
 #include <common/cli/cliargumentparser.h>
+#include <common/log/log.h>
 
-#include <fivednine/log/log.h>
 #include <fivednine/render/window.h>
 #include <fivednine/render/color.h>
 #include <fivednine/system/time.h>
@@ -21,9 +21,10 @@ int main(int argc, char** argv)
 {
     // Initialize logging
     log::SetLogVerbosity(log::LogVerbosity::Warning);
-    log::EnableZone(LOG_DEFAULT);
-    log::EnableZone(LOG_RENDER);
-    log::EnableZone(LOG_API);
+
+    log::RegisterLogZone(LOG_DEFAULT, true, "Default");
+    log::RegisterLogZone(LOG_RENDER, true, "Render");
+    log::RegisterLogZone(LOG_API, true, "API");
 
     cli::CommandLineArgumentParser argumentParser(argc, argv);
     const cli::CommandLineArgument* pConfigPathArgument = argumentParser.FindArgument("config");

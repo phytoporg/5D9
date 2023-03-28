@@ -4,5 +4,6 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/src/lib)
 
 file(GLOB SOURCES 
+    log/*.cpp
     cli/*.cpp)
 add_library(commonlib ${SOURCES})

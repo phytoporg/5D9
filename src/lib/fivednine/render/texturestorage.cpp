@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-#include <fivednine/log/log.h>
+#include <common/log/log.h>
 
 // Probably belongs in a more visible spot, but this isn't yet needed anywhere else.
 namespace {
