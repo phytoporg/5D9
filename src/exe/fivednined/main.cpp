@@ -50,7 +50,7 @@ int main(int argc, char** argv)
     {
         // Child process
         const std::string& LauncherPath = config.GetLauncherPath();
-        execlp(LauncherPath.c_str(), "--config /home/phil/tmp/config.json");
+        execl(LauncherPath.c_str(), "--config", config.GetLauncherConfig().c_str(), 0);
     }
 
     return 0;

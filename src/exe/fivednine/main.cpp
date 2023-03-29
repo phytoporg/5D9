@@ -31,7 +31,7 @@ int main(int argc, char** argv)
     if (!pConfigPathArgument)
     {
         // TODO: fall back to a reasonable default
-        RELEASE_LOG_ERROR(LOG_DEFAULT, "Required argument: --config");
+        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Required argument: --config");
         return -1;
     }
 
