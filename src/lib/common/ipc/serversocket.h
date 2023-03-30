@@ -5,11 +5,11 @@
 #include <vector>
 
 namespace common { namespace ipc {
-    class Socket
+    class ServerSocket
     {
     public:
-        Socket(const std::string& socketName, const int portNumber);
-        ~Socket();
+        ServerSocket(const std::string& socketName);
+        ~ServerSocket();
 
         bool Bind();
         bool Listen();
@@ -19,11 +19,10 @@ namespace common { namespace ipc {
         void Close(int clientFd);
 
     private:
-        Socket(const Socket& other) = delete;
-        Socket() = delete;
+        ServerSocket(const ServerSocket& other) = delete;
+        ServerSocket() = delete;
 
         const std::string& m_socketName;
-        int                m_portNumber = -1;
         int                m_fd = -1;
     };
 }}

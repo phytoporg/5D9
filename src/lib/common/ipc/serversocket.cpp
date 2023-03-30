@@ -1,8 +1,8 @@
-#include "socket.h"
+#include "serversocket.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
+#include <sys/un.h>
 #include <unistd.h>
 
 #include <common/log/check.h>
@@ -12,25 +12,24 @@
 using namespace common;
 using namespace common::ipc;
 
-Socket::Socket(const std::string& socketName, const int portNumber)
-    : m_socketName(socketName), m_portNumber(portNumber)
+ServerSocket::ServerSocket(const std::string& socketName)
+    : m_socketName(socketName)
 {
-    m_fd = socket(AF_INET, SOCK_STREAM, 0);
+    m_fd = socket(AF_LOCAL, SOCK_STREAM, 0);
     RELEASE_CHECK(m_fd > 0, "Failed to create socket for %s", socketName.c_str());
 }
-Socket::~Socket()
+ServerSocket::~ServerSocket()
 {
     close(m_fd);
     m_fd = -1;
 }
 
-bool Socket::Bind()
+bool ServerSocket::Bind()
 {
-    struct sockaddr_in saddr;
+    struct sockaddr_un saddr;
     memset(&saddr, 0, sizeof(saddr));
-    saddr.sin_family = AF_INET; // Should this be AF_LOCAL?
-    saddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    saddr.sin_port = htons(m_portNumber);
+    saddr.sun_family = AF_LOCAL;
+    strncpy(saddr.sun_path, m_socketName.c_str(), sizeof(saddr.sun_path));
 
     if (bind(m_fd, reinterpret_cast<struct sockaddr*>(&saddr), sizeof(saddr)) < 0)
     {
@@ -41,7 +40,7 @@ bool Socket::Bind()
     return true;
 }
 
-bool Socket::Listen()
+bool ServerSocket::Listen()
 {
     const int MaxConnections = 1;
     if (listen(m_fd, MaxConnections) < 0)
@@ -52,13 +51,13 @@ bool Socket::Listen()
 
     RELEASE_LOGLINE_INFO(
         LOG_DEFAULT,
-        "Socket %s listening on port %d", m_socketName.c_str(), m_portNumber);
+        "ServerSocket %s listening on port %d", m_socketName.c_str(), m_portNumber);
     return true;
 }
 
-bool Socket::Accept(int* pClientFdOut)
+bool ServerSocket::Accept(int* pClientFdOut)
 {
-    struct sockaddr_in caddr;
+    struct sockaddr_un caddr;
     int len = sizeof(caddr);
 
     int clientFd = accept(m_fd, reinterpret_cast<struct sockaddr*>(&caddr), reinterpret_cast<socklen_t*>(&len));
@@ -82,7 +81,7 @@ bool Socket::Accept(int* pClientFdOut)
     return true;
 }
 
-bool Socket::Write(int clientFd, uint8_t *pBuffer, size_t bufferSize)
+bool ServerSocket::Write(int clientFd, uint8_t *pBuffer, size_t bufferSize)
 {
     ssize_t numBytesWritten = write(clientFd, pBuffer, bufferSize);
     if (numBytesWritten < 0)
@@ -105,7 +104,7 @@ bool Socket::Write(int clientFd, uint8_t *pBuffer, size_t bufferSize)
     return true;
 }
 
-bool Socket::Read(int clientFd, uint8_t *pBuffer, size_t bufferSize)
+bool ServerSocket::Read(int clientFd, uint8_t *pBuffer, size_t bufferSize)
 {
     ssize_t numBytesRead = read(clientFd, pBuffer, bufferSize);
     if (numBytesRead <= 0)
@@ -128,8 +127,7 @@ bool Socket::Read(int clientFd, uint8_t *pBuffer, size_t bufferSize)
     return true;
 }
 
-void Socket::Close(int clientFd)
+void ServerSocket::Close(int clientFd)
 {
     close(clientFd);
 }
-
