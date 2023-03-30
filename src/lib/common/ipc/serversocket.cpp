@@ -7,8 +7,6 @@
 
 #include <common/log/check.h>
 
-#include <cstring>
-
 using namespace common;
 using namespace common::ipc;
 
@@ -29,7 +27,9 @@ bool ServerSocket::Bind()
     struct sockaddr_un saddr;
     memset(&saddr, 0, sizeof(saddr));
     saddr.sun_family = AF_LOCAL;
-    strncpy(saddr.sun_path, m_socketName.c_str(), sizeof(saddr.sun_path));
+    strncpy(saddr.sun_path, m_socketName.c_str(), m_socketName.size());
+
+    unlink(m_socketName.c_str());
 
     if (bind(m_fd, reinterpret_cast<struct sockaddr*>(&saddr), sizeof(saddr)) < 0)
     {
@@ -45,13 +45,13 @@ bool ServerSocket::Listen()
     const int MaxConnections = 1;
     if (listen(m_fd, MaxConnections) < 0)
     {
-        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to listen on port %d", m_portNumber);
+        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Server socket failed to listen");
         return false;
     }
 
     RELEASE_LOGLINE_INFO(
         LOG_DEFAULT,
-        "ServerSocket %s listening on port %d", m_socketName.c_str(), m_portNumber);
+        "ServerSocket %s listening", m_socketName.c_str());
     return true;
 }
 
@@ -65,17 +65,15 @@ bool ServerSocket::Accept(int* pClientFdOut)
     {
         RELEASE_LOGLINE_ERROR(
             LOG_DEFAULT,
-            "Failed to accept connection on socket %s port %d",
-            m_socketName.c_str(),
-            m_portNumber);
+            "Failed to accept connection on socket %s",
+            m_socketName.c_str());
         return false;
     }
 
     RELEASE_LOGLINE_INFO(
         LOG_DEFAULT,
-        "Accepted connection on socket %s port %d",
-        m_socketName.c_str(),
-        m_portNumber);
+        "Accepted connection on socket %s",
+        m_socketName.c_str());
 
     *pClientFdOut = clientFd;
     return true;

@@ -20,7 +20,7 @@ namespace common { namespace ipc {
         ClientSocket(const ClientSocket& other) = delete;
         ClientSocket() = delete;
 
-        const std::string& m_socketName;
+        const std::string  m_socketName;
         int                m_fd = -1;
     };
 }}

@@ -65,6 +65,10 @@ namespace
     }
 }
 
+fivednineApp::fivednineApp()
+    : m_clientSocket("/tmp/5D9d"), m_projectionMatrix(1.f)
+{}
+
 bool fivednineApp::Initialize(const AppConfig& configuration, Window* pWindow)
 {
     RELEASE_CHECK(pWindow, "pWindow cannot be null");
@@ -123,6 +127,13 @@ bool fivednineApp::Initialize(const AppConfig& configuration, Window* pWindow)
     // TODO: Factor out all of the input goo
     m_pWindow->SetKeyStateChangedHandler(HandleKeypress);
     m_pWindow->SetUserPointer(this);
+
+    // Connect to server
+    if (!m_clientSocket.Connect())
+    {
+        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to connect to 5D9d daemon");
+        return false;
+    }
 
     m_isInitialized = true;
     return true;

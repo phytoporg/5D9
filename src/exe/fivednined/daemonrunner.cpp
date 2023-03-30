@@ -11,8 +11,7 @@ DaemonRunner::DaemonRunner(const DaemonConfig& config)
 
 void DaemonRunner::Run()
 {
-    const int PortNumber = 6500;
-    ipc::ServerSocket serverSocket("5D9d", PortNumber);
+    ipc::ServerSocket serverSocket("/tmp/5D9d");
     if (!serverSocket.Bind())
     {
         return;
