@@ -5,15 +5,17 @@
 - Basic carousel selector
 - Keyboard navigation
 
-* Process management solution
-** Stand up a basic daemon 
-** Port logging over to common lib
-** Daemon starts launcher
+- Process management solution
+-- Stand up a basic daemon 
+-- Port logging over to common lib
+-- Daemon starts launcher
 ** Establish a *very* simple IPC messaging protocol:
-*** Start launcher
+--- Start launcher
 *** Swap launcher & game (process suspend/resume/termination is implicit)
 ** Daemon games/processes are configurable
 *** Add support for game config query messages
+
+* Minor item: use errno for all socket failures
 
 * Controller navigation
 * Implement "selector" API via dynlib
