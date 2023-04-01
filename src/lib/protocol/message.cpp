@@ -23,7 +23,7 @@ GameConfiguration::GameConfiguration(const char *pTitle, const char *pCommand)
 }
 
 ConfigureMessage::ConfigureMessage(GameConfiguration* pConfigurations, uint8_t configurationCount)
-    : Header(MessageType::Configure, sizeof(ConfigureMessage) + sizeof(GameConfiguration) * configurationCount),
+    : Header(MessageType::Configure, sizeof(Header) + sizeof(ConfigurationCount) + sizeof(GameConfiguration) * configurationCount),
       ConfigurationCount(configurationCount)
 {
     RELEASE_CHECK(configurationCount < kMaxNumConfigurations, "Exceeded maximum configuration count");

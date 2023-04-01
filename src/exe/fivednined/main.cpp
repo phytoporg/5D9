@@ -49,8 +49,8 @@ int main(int argc, char** argv)
     else
     {
         // Child process
-        const std::string& LauncherPath = config.GetLauncherPath();
-        execl(LauncherPath.c_str(), LauncherPath.c_str(), "--config", config.GetLauncherConfig().c_str(), 0);
+        // const std::string& LauncherPath = config.GetLauncherPath();
+        // execl(LauncherPath.c_str(), LauncherPath.c_str(), "--config", config.GetLauncherConfig().c_str(), 0);
     }
 
     return 0;

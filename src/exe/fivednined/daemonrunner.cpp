@@ -26,12 +26,10 @@ void DaemonRunner::Run()
             {
                 uint8_t buffer[2048];
                 ssize_t bytesRead = 0;
-                RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "BEFORE");
                 while ((bytesRead = serverSocket.Read(clientFd, buffer, sizeof(buffer))) > 0)
                 {
                     RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Testing: read %d bytes", bytesRead);
                 }
-                RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "AFTER: %d", bytesRead);
             }
             serverSocket.Close(clientFd);
         }

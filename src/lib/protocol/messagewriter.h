@@ -5,20 +5,23 @@
 #include <common/memory/memorystream.h>
 
 namespace protocol {
-    using WriterStream = common::memory::MemoryStream<512>;
+    const uint32_t kMessageWriterChunkSize = 512;
+    using WriterStream = common::memory::MemoryStream<kMessageWriterChunkSize>;
     class MessageWriter
     {
     public:
-        MessageWriter(WriterStream& writeStream);
-        size_t WriteMessage(const MessageHeader* pHeader);
+        MessageWriter(const MessageHeader* pHeader, WriterStream& writeStream);
 
-        template<typename TMessage>
-        size_t WriteMessage(const TMessage& message)
-        {
-            return WriteMessage(&(message.Header));
-        }
+        // Returns 0 when done
+        size_t WriteNext();
+        size_t ChunksRemaining() const;
+        size_t TotalBytesWritten() const;
 
     private:
+        const MessageHeader* m_pHeader = nullptr;
+        const uint8_t* m_pNext = nullptr;
+        const uint8_t* m_pLast = nullptr;
+        size_t m_totalBytesWritten = 0;
         WriterStream& m_stream;
     };
 }

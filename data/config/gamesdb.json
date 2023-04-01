@@ -7,7 +7,8 @@
             "steam_appid" : 348550,
             "proton" : true,
             "supported" : true,
-            "texture_prefix" : "plusr"
+            "texture_prefix" : "plusr",
+            "command" : "placeholder"
         },
         {
             "title" : "Guilty Gear Xrd REV 2",
@@ -15,7 +16,8 @@
             "steam_appid" : 520440,
             "proton" : true,
             "supported" : false,
-            "texture_prefix" : "ggxrdr2"
+            "texture_prefix" : "ggxrdr2",
+            "command" : "placeholder"
         },
         {
             "title" : "Them's Fightin' Herds",
@@ -23,7 +25,8 @@
             "steam_appid" : 574980,
             "proton" : false,
             "supported" : false,
-            "texture_prefix" : "tfh"
+            "texture_prefix" : "tfh",
+            "command" : "placeholder"
         },
         {
             "title" : "Melty Blood: Type Lumina",
@@ -31,7 +34,8 @@
             "steam_appid" : 1372280,
             "proton" : true,
             "supported" : false,
-            "texture_prefix" : "mbtl"
+            "texture_prefix" : "mbtl",
+            "command" : "placeholder"
         },
         {
             "title" : "Melty Blood: Actress Again Current Code",
@@ -39,7 +43,8 @@
             "steam_appid" : 411370,
             "proton" : true,
             "supported" : false,
-            "texture_prefix" : "mbaacc"
+            "texture_prefix" : "mbaacc",
+            "command" : "placeholder"
         }
     ]
 }

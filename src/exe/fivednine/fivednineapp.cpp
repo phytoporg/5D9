@@ -6,8 +6,6 @@
 #include <fstream>
 #include <sstream>
 
-#include <cstring>
-
 #include <json/json.hpp>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -133,6 +131,7 @@ bool fivednineApp::Initialize(const AppConfig& configuration, Window* pWindow)
     m_pWindow->SetUserPointer(this);
 
     // Connect to server
+    // TODO: specify a timeout of some kind
     if (!m_clientSocket.Connect())
     {
         RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to connect to 5D9 daemon");
@@ -340,20 +339,30 @@ bool fivednineApp::LoadShaders(const AppConfig& configuration)
     return true;
 }
 
-bool fivednineApp::LoadGamesInfo(const AppConfig& configuration)
-{
-    const std::string& GamesDBPath = configuration.GetGamesDbPath();
-    if (!std::filesystem::exists(GamesDBPath))
-    {
+bool fivednineApp::LoadGamesInfo(const AppConfig& configuration) {
+    const std::string &GamesDBPath = configuration.GetGamesDbPath();
+    if (!std::filesystem::exists(GamesDBPath)) {
         RELEASE_LOGLINE_ERROR(
-            LOG_DEFAULT,
-            "Games database configuration path does not exist: %s",
-            GamesDBPath.c_str());
+                LOG_DEFAULT,
+                "Games database configuration path does not exist: %s",
+                GamesDBPath.c_str());
         return false;
     }
 
     std::ifstream gamesDbIn(GamesDBPath);
-    json gamesDbData = json::parse(gamesDbIn);
+
+    const bool AllowExceptions = false;
+    json gamesDbData = json::parse(gamesDbIn, nullptr, AllowExceptions);
+    if (gamesDbData.is_discarded())
+    {
+        // This json library requires use of exceptions to get diagnostic info :(
+        RELEASE_LOGLINE_ERROR(
+            LOG_DEFAULT,
+            "Json parse error for file: %s (no diagnostic information available)",
+            GamesDBPath.c_str());
+        return false;
+    }
+
     if (!gamesDbData.contains("games"))
     {
         RELEASE_LOGLINE_ERROR(
@@ -386,14 +395,14 @@ bool fivednineApp::LoadGamesInfo(const AppConfig& configuration)
             failedParseGames = true;
             continue;
         }
-        gameInfo.Title = gameEntry["title"].get<std::string>().c_str();
+        gameInfo.Title = gameEntry["title"].get<std::string>();
 
         if (!gameEntry.contains("alias"))
         {
             RELEASE_LOGLINE_ERROR(
                 LOG_DEFAULT,
                 "Game DB entry %s is missing required field: 'alias'",
-                gameInfo.Title);
+                gameInfo.Title.c_str());
             failedParseGames = true;
             continue;
         }
@@ -404,11 +413,22 @@ bool fivednineApp::LoadGamesInfo(const AppConfig& configuration)
             RELEASE_LOGLINE_ERROR(
                 LOG_DEFAULT,
                 "Game DB entry %s is missing required field: 'texture_prefix'",
-                gameInfo.Title);
+                gameInfo.Title.c_str());
             failedParseGames = true;
             continue;
         }
         gameInfo.TexturePrefix = gameEntry["texture_prefix"].get<std::string>();
+
+        if (!gameEntry.contains("command"))
+        {
+            RELEASE_LOGLINE_ERROR(
+                    LOG_DEFAULT,
+                    "Game DB entry %s is missing required field: 'command'",
+                    gameInfo.Title.c_str());
+            failedParseGames = true;
+            continue;
+        }
+        gameInfo.Command = gameEntry["texture_prefix"].get<std::string>();
 
         m_gameInfoArray[m_numGameInfos] = gameInfo;
         ++m_numGameInfos;
@@ -442,17 +462,32 @@ bool fivednineApp::SendGameInfoToDaemon()
     configurations.reserve(m_numGameInfos);
     for (uint8_t i = 0; i < m_numGameInfos; ++i)
     {
-        // TODO: COMMAND
-        // configurations.emplace_back(m_gameInfoArray[i].Title, /*m_gameInfoArray[i].Command*/);
+        configurations.emplace_back( m_gameInfoArray[i].Title.c_str(), m_gameInfoArray[i].Command.c_str());
     }
 
-    const protocol::ConfigureMessage ConfigureMessage(configurations.data(), configurations.size());
+    const protocol::ConfigureMessage ConfigureMessage(configurations.data(), m_numGameInfos);
     protocol::WriterStream writerStream;
-    protocol::MessageWriter writer(writerStream);
-    writer.WriteMessage<protocol::ConfigureMessage>(ConfigureMessage);
+    protocol::MessageWriter writer(&ConfigureMessage.Header, writerStream);
 
-    const ssize_t bytesWritten = m_clientSocket.Write(reinterpret_cast<uint8_t*>(writerStream.Get()), writerStream.Tell());
-    return bytesWritten == ConfigureMessage.Header.MessageLen;
+    // Send entire message one chunk at a time if necessary (dictated by stream size)
+    while (writer.ChunksRemaining() > 0)
+    {
+        if (!writer.WriteNext())
+        {
+            break;
+        }
+
+        const ssize_t BytesSent = m_clientSocket.Write(reinterpret_cast<uint8_t*>(writerStream.Get()), writerStream.Tell());
+        if (BytesSent < 0)
+        {
+            break;
+        }
+
+        // Reset the stream to write and send the next chunk if needed
+        writerStream.Seek(0);
+    }
+
+    return writer.TotalBytesWritten() == ConfigureMessage.Header.MessageLen;
 }
 
 // API METHODS
