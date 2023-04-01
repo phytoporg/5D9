@@ -3,7 +3,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
-#include <errno.h>
+#include <cerrno>
 
 #include <common/log/check.h>
 
@@ -42,9 +42,9 @@ bool ClientSocket::Connect()
     return true;
 }
 
-bool ClientSocket::Write(uint8_t* pBuffer, size_t bufferSize)
+ssize_t ClientSocket::Write(uint8_t* pBuffer, size_t bufferSize)
 {
-    ssize_t numBytesWritten = write(m_fd, pBuffer, bufferSize);
+    const ssize_t numBytesWritten = write(m_fd, pBuffer, bufferSize);
     if (numBytesWritten < 0)
     {
         RELEASE_LOGLINE_ERROR(
@@ -52,7 +52,7 @@ bool ClientSocket::Write(uint8_t* pBuffer, size_t bufferSize)
             "Failed to write data of size %u on socket %s",
             bufferSize,
             m_socketName.c_str());
-        return false;
+        return numBytesWritten;
     }
 
     RELEASE_LOGLINE_INFO(
@@ -60,20 +60,20 @@ bool ClientSocket::Write(uint8_t* pBuffer, size_t bufferSize)
         "Wrote %d bytes on socket %s",
         numBytesWritten,
         m_socketName.c_str());
-    return true;
+    return numBytesWritten;
 }
 
-bool ClientSocket::Read(uint8_t* pBuffer, size_t bufferSize)
+ssize_t ClientSocket::Read(uint8_t* pBuffer, size_t bufferSize)
 {
-    ssize_t numBytesRead = read(m_fd, pBuffer, bufferSize);
-    if (numBytesRead <= 0)
+    const ssize_t numBytesRead = read(m_fd, pBuffer, bufferSize);
+    if (numBytesRead < 0)
     {
         RELEASE_LOGLINE_ERROR(
             LOG_DEFAULT,
             "Failed to read data of size %u on socket %s",
             bufferSize,
             m_socketName.c_str());
-        return false;
+        return numBytesRead;
     }
 
     RELEASE_LOGLINE_INFO(
@@ -81,7 +81,7 @@ bool ClientSocket::Read(uint8_t* pBuffer, size_t bufferSize)
         "Read %d bytes on socket %s",
         numBytesRead,
         m_socketName.c_str());
-    return true;
+    return numBytesRead;
 }
 
 void ClientSocket::Close()

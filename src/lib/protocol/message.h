@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <memory>
 
 namespace protocol {
     // General
@@ -28,16 +29,19 @@ namespace protocol {
     static constexpr uint32_t kGameCommandMaxLength = 1024;
     struct GameConfiguration
     {
+        GameConfiguration();
+        GameConfiguration(const char* pTitle, const char* pCommand);
         char Name[kGameNameMaxLength];
         char Command[kGameCommandMaxLength];
     };
 
+    constexpr uint8_t kMaxNumConfigurations = 255;
     struct ConfigureMessage
     {
-        ConfigureMessage(GameConfiguration* pConfigurations, uint32_t configurationCount);
+        ConfigureMessage(GameConfiguration* pConfigurations, uint8_t configurationCount);
         MessageHeader     Header;
-        uint32_t          ConfigurationCount = 0;
-        GameConfiguration Configurations[];
+        uint8_t           ConfigurationCount = 0;
+        GameConfiguration Configurations[kMaxNumConfigurations];
     };
 
     // Launch

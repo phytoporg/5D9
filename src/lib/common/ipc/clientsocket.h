@@ -12,8 +12,8 @@ namespace common { namespace ipc {
         ~ClientSocket();
 
         bool Connect();
-        bool Write(uint8_t* pBuffer, size_t bufferSize);
-        bool Read(uint8_t* pBuffer, size_t bufferSize);
+        ssize_t Write(uint8_t* pBuffer, size_t bufferSize);
+        ssize_t Read(uint8_t* pBuffer, size_t bufferSize);
         void Close();
 
     private:

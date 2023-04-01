@@ -10,6 +10,7 @@ add_executable(${TARGETNAME} ${SOURCES})
 
 target_link_libraries(${TARGETNAME}
     commonlib
+    protocollib
     fivedninelib
     ${GLEW_LIBRARIES}
     ${OPENGL_LIBRARIES}

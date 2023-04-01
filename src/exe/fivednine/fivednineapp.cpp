@@ -1,11 +1,12 @@
 #include "fivednineapp.h"
 #include "appconfig.h"
 
-#include <algorithm>
 #include <filesystem>
 #include <vector>
 #include <fstream>
 #include <sstream>
+
+#include <cstring>
 
 #include <json/json.hpp>
 
@@ -13,6 +14,9 @@
 
 #include <common/log/log.h>
 #include <common/log/check.h>
+
+#include <protocol/message.h>
+#include <protocol/messagewriter.h>
 
 #include <fivednine/render/window.h>
 
@@ -131,7 +135,13 @@ bool fivednineApp::Initialize(const AppConfig& configuration, Window* pWindow)
     // Connect to server
     if (!m_clientSocket.Connect())
     {
-        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to connect to 5D9d daemon");
+        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to connect to 5D9 daemon");
+        return false;
+    }
+
+    if (!SendGameInfoToDaemon())
+    {
+        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to send configure to 5D9 daemon");
         return false;
     }
 
@@ -376,14 +386,14 @@ bool fivednineApp::LoadGamesInfo(const AppConfig& configuration)
             failedParseGames = true;
             continue;
         }
-        gameInfo.Title = gameEntry["title"].get<std::string>();
+        gameInfo.Title = gameEntry["title"].get<std::string>().c_str();
 
         if (!gameEntry.contains("alias"))
         {
             RELEASE_LOGLINE_ERROR(
                 LOG_DEFAULT,
                 "Game DB entry %s is missing required field: 'alias'",
-                gameInfo.Title.c_str());
+                gameInfo.Title);
             failedParseGames = true;
             continue;
         }
@@ -394,7 +404,7 @@ bool fivednineApp::LoadGamesInfo(const AppConfig& configuration)
             RELEASE_LOGLINE_ERROR(
                 LOG_DEFAULT,
                 "Game DB entry %s is missing required field: 'texture_prefix'",
-                gameInfo.Title.c_str());
+                gameInfo.Title);
             failedParseGames = true;
             continue;
         }
@@ -424,6 +434,25 @@ bool fivednineApp::LoadGamesInfo(const AppConfig& configuration)
     }
 
     return true;
+}
+
+bool fivednineApp::SendGameInfoToDaemon()
+{
+    std::vector<protocol::GameConfiguration> configurations;
+    configurations.reserve(m_numGameInfos);
+    for (uint8_t i = 0; i < m_numGameInfos; ++i)
+    {
+        // TODO: COMMAND
+        // configurations.emplace_back(m_gameInfoArray[i].Title, /*m_gameInfoArray[i].Command*/);
+    }
+
+    const protocol::ConfigureMessage ConfigureMessage(configurations.data(), configurations.size());
+    protocol::WriterStream writerStream;
+    protocol::MessageWriter writer(writerStream);
+    writer.WriteMessage<protocol::ConfigureMessage>(ConfigureMessage);
+
+    const ssize_t bytesWritten = m_clientSocket.Write(reinterpret_cast<uint8_t*>(writerStream.Get()), writerStream.Tell());
+    return bytesWritten == ConfigureMessage.Header.MessageLen;
 }
 
 // API METHODS

@@ -52,6 +52,7 @@ class fivednineApp
         bool LoadTextures(const AppConfig& configuration);
         bool LoadShaders(const AppConfig& configuration);
         bool LoadGamesInfo(const AppConfig& configuration);
+        bool SendGameInfoToDaemon();
 
         static void 
         HandleKeypress(

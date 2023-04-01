@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
+#include <cerrno>
 
 #include <common/log/check.h>
 
@@ -59,7 +60,7 @@ bool ServerSocket::Accept(int* pClientFdOut)
     struct sockaddr_un caddr;
     int len = sizeof(caddr);
 
-    int clientFd = accept(m_fd, reinterpret_cast<struct sockaddr*>(&caddr), reinterpret_cast<socklen_t*>(&len));
+    const int clientFd = accept(m_fd, reinterpret_cast<struct sockaddr*>(&caddr), reinterpret_cast<socklen_t*>(&len));
     if (clientFd < 0)
     {
         RELEASE_LOGLINE_ERROR(
@@ -78,7 +79,7 @@ bool ServerSocket::Accept(int* pClientFdOut)
     return true;
 }
 
-bool ServerSocket::Write(int clientFd, uint8_t *pBuffer, size_t bufferSize)
+ssize_t ServerSocket::Write(int clientFd, uint8_t *pBuffer, size_t bufferSize)
 {
     ssize_t numBytesWritten = write(clientFd, pBuffer, bufferSize);
     if (numBytesWritten < 0)
@@ -89,7 +90,7 @@ bool ServerSocket::Write(int clientFd, uint8_t *pBuffer, size_t bufferSize)
             bufferSize,
             clientFd,
             m_socketName.c_str());
-        return false;
+        return numBytesWritten;
     }
 
     RELEASE_LOGLINE_INFO(
@@ -98,21 +99,23 @@ bool ServerSocket::Write(int clientFd, uint8_t *pBuffer, size_t bufferSize)
         numBytesWritten,
         clientFd,
         m_socketName.c_str());
-    return true;
+    return numBytesWritten;
 }
 
-bool ServerSocket::Read(int clientFd, uint8_t *pBuffer, size_t bufferSize)
+ssize_t ServerSocket::Read(int clientFd, uint8_t *pBuffer, size_t bufferSize)
 {
-    ssize_t numBytesRead = read(clientFd, pBuffer, bufferSize);
-    if (numBytesRead <= 0)
+    const ssize_t numBytesRead = read(clientFd, pBuffer, bufferSize);
+    if (numBytesRead < 0)
     {
         RELEASE_LOGLINE_ERROR(
                 LOG_DEFAULT,
-                "Failed to read data of size %u for client %d on socket %s",
+                "Failed to read data of size %u for client %d on socket %s (read %d): %s",
                 bufferSize,
                 clientFd,
-                m_socketName.c_str());
-        return false;
+                m_socketName.c_str(),
+                numBytesRead,
+                strerror(errno));
+        return numBytesRead;
     }
 
     RELEASE_LOGLINE_INFO(
@@ -121,7 +124,7 @@ bool ServerSocket::Read(int clientFd, uint8_t *pBuffer, size_t bufferSize)
             numBytesRead,
             clientFd,
             m_socketName.c_str());
-    return true;
+    return numBytesRead;
 }
 
 void ServerSocket::Close(int clientFd)

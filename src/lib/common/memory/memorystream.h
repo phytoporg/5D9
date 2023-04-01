@@ -10,9 +10,10 @@ namespace common { namespace memory {
     class MemoryStream
     {
     public:
-        size_t Write(void* pSource, size_t length);
+        size_t Write(const void* pSource, size_t length);
         size_t Read(void* pDestination, size_t length);
         size_t Capacity() const;
+        void* Get();
 
         bool Seek(size_t newPosition);
         size_t Tell() const;
@@ -23,7 +24,7 @@ namespace common { namespace memory {
     };
 
     template<size_t TBufferSize>
-    size_t MemoryStream<TBufferSize>::Write(void *pSource, size_t length)
+    size_t MemoryStream<TBufferSize>::Write(const void *pSource, size_t length)
     {
         const size_t BytesLeft = TBufferSize - m_streamPosition;
         const size_t BytesToWrite = BytesLeft < length ? BytesLeft : length;
@@ -47,6 +48,11 @@ namespace common { namespace memory {
     template<size_t TBufferSize>
     size_t MemoryStream<TBufferSize>::Capacity() const {
         return TBufferSize;
+    }
+
+    template<size_t TBufferSize>
+    void* MemoryStream<TBufferSize>::Get() {
+        return m_buffer;
     }
 
     template<size_t TBufferSize>

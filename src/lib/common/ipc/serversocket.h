@@ -14,8 +14,8 @@ namespace common { namespace ipc {
         bool Bind();
         bool Listen();
         bool Accept(int* pClientFdOut);
-        bool Write(int clientFd, uint8_t* pBuffer, size_t bufferSize);
-        bool Read(int clientFd, uint8_t* pBuffer, size_t bufferSize);
+        ssize_t Write(int clientFd, uint8_t* pBuffer, size_t bufferSize);
+        ssize_t Read(int clientFd, uint8_t* pBuffer, size_t bufferSize);
         void Close(int clientFd);
 
     private:

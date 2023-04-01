@@ -4,7 +4,7 @@
 
 struct GameInfo
 {
-    std::string Title;
+    const char *Title;
     std::string Alias;
     std::string TexturePrefix;
 };

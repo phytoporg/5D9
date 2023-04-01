@@ -6,7 +6,7 @@ MessageWriter::MessageWriter(WriterStream& writeStream)
     : m_stream(writeStream)
 {}
 
-size_t MessageWriter::WriteMessage(MessageHeader* pHeader)
+size_t MessageWriter::WriteMessage(const MessageHeader* pHeader)
 {
     return m_stream.Write(pHeader, pHeader->MessageLen);
 }

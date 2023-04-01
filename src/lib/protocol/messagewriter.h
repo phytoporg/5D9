@@ -10,12 +10,12 @@ namespace protocol {
     {
     public:
         MessageWriter(WriterStream& writeStream);
-        size_t WriteMessage(MessageHeader* pHeader);
+        size_t WriteMessage(const MessageHeader* pHeader);
 
         template<typename TMessage>
         size_t WriteMessage(const TMessage& message)
         {
-            return WriteMessage(&message.Header);
+            return WriteMessage(&(message.Header));
         }
 
     private:
