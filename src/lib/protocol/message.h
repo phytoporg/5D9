@@ -17,6 +17,7 @@ namespace protocol {
     static constexpr uint32_t kMessageMagic = 0xBEED00B;
     struct MessageHeader
     {
+        MessageHeader() = default;
         MessageHeader(MessageType type, size_t messageLen);
 
         const uint32_t Magic = kMessageMagic;

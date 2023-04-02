@@ -12,14 +12,15 @@ MessageHeader::MessageHeader(MessageType type, size_t messageLen)
 
 GameConfiguration::GameConfiguration()
 {
-    memset(&Name, 0, sizeof(Name));
-    memset(&Command, 0, sizeof(Command));
+    memset(Name, 0, sizeof(Name));
+    memset(Command, 0, sizeof(Command));
 }
 
 GameConfiguration::GameConfiguration(const char *pTitle, const char *pCommand)
     : GameConfiguration()
 {
-    // TODO
+    strncpy(Name, pTitle, sizeof(Name));
+    strncpy(Command, pCommand, sizeof(Command));
 }
 
 ConfigureMessage::ConfigureMessage(GameConfiguration* pConfigurations, uint8_t configurationCount)

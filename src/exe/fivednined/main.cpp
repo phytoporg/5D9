@@ -15,7 +15,7 @@ int main(int argc, char** argv)
     // TODO: Do daemon things like chdir("/") and umask(0) and fork()
 
     // Initialize logging
-    log::SetLogVerbosity(log::LogVerbosity::Warning);
+    log::SetLogVerbosity(log::LogVerbosity::Info);
     log::RegisterLogZone(LOG_DEFAULT, true, "Default");
 
     CommandLineArgumentParser argumentParser(argc, argv);

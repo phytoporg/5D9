@@ -428,7 +428,7 @@ bool fivednineApp::LoadGamesInfo(const AppConfig& configuration) {
             failedParseGames = true;
             continue;
         }
-        gameInfo.Command = gameEntry["texture_prefix"].get<std::string>();
+        gameInfo.Command = gameEntry["command"].get<std::string>();
 
         m_gameInfoArray[m_numGameInfos] = gameInfo;
         ++m_numGameInfos;
