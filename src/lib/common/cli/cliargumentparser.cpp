@@ -1,7 +1,5 @@
 #include "cliargumentparser.h"
 
-#include <common/log/log.h>
-
 #include <cstring>
 
 using namespace common;

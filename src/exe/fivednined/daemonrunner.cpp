@@ -96,7 +96,6 @@ void DaemonRunner::Run()
                     continue;
                 }
 
-
                 switch (MessageType)
                 {
                     case protocol::MessageType::Configure:
