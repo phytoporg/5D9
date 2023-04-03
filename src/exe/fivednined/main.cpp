@@ -26,6 +26,8 @@ int main(int argc, char** argv)
         return -1;
     }
 
+    const bool SkipLaunch = (argumentParser.FindArgument("skip-launch") != nullptr);
+
     DaemonConfig config;
     if (!config.Parse(ConfigPath))
     {
@@ -46,11 +48,10 @@ int main(int argc, char** argv)
         DaemonRunner runner(config);
         runner.Run();
     }
-    else
+    else if (!SkipLaunch)
     {
-        // Child process
-        // const std::string& LauncherPath = config.GetLauncherPath();
-        // execl(LauncherPath.c_str(), LauncherPath.c_str(), "--config", config.GetLauncherConfig().c_str(), 0);
+        const std::string& LauncherPath = config.GetLauncherPath();
+        execl(LauncherPath.c_str(), LauncherPath.c_str(), "--config", config.GetLauncherConfig().c_str(), 0);
     }
 
     return 0;
