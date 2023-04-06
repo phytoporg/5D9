@@ -9,15 +9,16 @@ class DaemonConfig;
 class DaemonRunner
 {
 public:
-    DaemonRunner(const DaemonConfig& config);
+    DaemonRunner(const DaemonConfig& config, pid_t launcherPid);
     void Run();
 
 private:
     bool HandleConfigurationMessage(protocol::MessageHeader *pHeader);
     bool HandleLaunchMessage(protocol::MessageHeader *pHeader);
-
-    std::vector<LaunchInfo> m_launchInfo;
-    const DaemonConfig& m_config;
-
     bool LaunchGame(protocol::LaunchMessage *pMessage);
+
+    pid_t                   m_launcherPid = -1;
+    pid_t                   m_gamePid = -1;
+    std::vector<LaunchInfo> m_launchInfo;
+    const DaemonConfig&     m_config;
 };

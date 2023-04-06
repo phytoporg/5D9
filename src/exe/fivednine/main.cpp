@@ -21,6 +21,7 @@ int main(int argc, char** argv)
 {
     // Initialize logging
     log::SetLogVerbosity(log::LogVerbosity::Warning);
+    log::SetLogFile("/tmp/log.txt");
 
     log::RegisterLogZone(LOG_DEFAULT, true, "Default");
     log::RegisterLogZone(LOG_RENDER, true, "Render");
@@ -42,7 +43,11 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    Window window("shotOS game selection carousel");
+    Window window(
+        "shotOS game selection carousel",
+        Window::kDefaultWindowWidth,
+        Window::kDefaultWindowHeight,
+        true);
     fivednineApp app;
     if (!app.Initialize(appConfig, &window))
     {

@@ -22,6 +22,8 @@ namespace
                 return Window::EventType::KeyDown;
             case SDL_KEYUP:
                 return Window::EventType::KeyUp;
+            case SDL_WINDOWEVENT:
+                return Window::EventType::WindowEvent;
             default:
                 return Window::EventType::Invalid;
         }
@@ -45,6 +47,43 @@ namespace
                 return Window::KeyType::Spacebar;
             default:
                 return Window::KeyType::Invalid;
+        }
+    }
+
+    Window::WindowEvent SDLWindowEventToWindowEvent(Uint8 eventId)
+    {
+        switch (eventId)
+        {
+            case SDL_WINDOWEVENT_SHOWN:
+                return Window::WindowEvent::Shown;
+            case SDL_WINDOWEVENT_HIDDEN:
+                return Window::WindowEvent::Hidden;
+            case SDL_WINDOWEVENT_EXPOSED:
+                return Window::WindowEvent::Exposed;
+            case SDL_WINDOWEVENT_MOVED:
+                return Window::WindowEvent::Moved;
+            case SDL_WINDOWEVENT_RESIZED:
+                return Window::WindowEvent::Resized;
+            case SDL_WINDOWEVENT_SIZE_CHANGED:
+                return Window::WindowEvent::SizeChanged;
+            case SDL_WINDOWEVENT_MINIMIZED:
+                return Window::WindowEvent::Minimized;
+            case SDL_WINDOWEVENT_MAXIMIZED:
+                return Window::WindowEvent::Maximized;
+            case SDL_WINDOWEVENT_RESTORED:
+                return Window::WindowEvent::Restored;
+            case SDL_WINDOWEVENT_ENTER:
+                return Window::WindowEvent::Enter;
+            case SDL_WINDOWEVENT_LEAVE:
+                return Window::WindowEvent::Leave;
+            case SDL_WINDOWEVENT_FOCUS_GAINED:
+                return Window::WindowEvent::FocusGained;
+            case SDL_WINDOWEVENT_FOCUS_LOST:
+                return Window::WindowEvent::FocusLost;
+            case SDL_WINDOWEVENT_CLOSE:
+                return Window::WindowEvent::Close;
+            default:
+                return Window::WindowEvent::Invalid;
         }
     }
 }
@@ -107,7 +146,7 @@ Window::~Window()
 Window::EventType Window::PollEvents() const
 {
     SDL_Event e;
-    if (SDL_PollEvent(&e))
+    while (SDL_PollEvent(&e))
     {
         const Window::EventType EventType = SDLTofivednineEvent(e.type);
         switch (EventType)
@@ -121,6 +160,14 @@ Window::EventType Window::PollEvents() const
                         EventType,
                         SDLKeySymToKeyType(e.key.keysym.sym),
                         m_pUserPointer);
+                }
+                break;
+            case Window::EventType::WindowEvent:
+                if (m_pfnWindowChanged)
+                {
+                    const Window::WindowEvent windowEvent =
+                        SDLWindowEventToWindowEvent(e.window.event);
+                    m_pfnWindowChanged(windowEvent, m_pUserPointer);
                 }
                 break;
             default:
@@ -163,6 +210,11 @@ void Window::GetWindowDimensions(uint32_t* pWidthOut, uint32_t* pHeightOut) cons
 void Window::SetKeyStateChangedHandler(FnKeyStateChangedHandler pfnHandler)
 {
     m_pfnKeyStateChanged = pfnHandler;
+}
+
+void Window::SetWindowStateChangedHandler(FnWindowChangedHandler pfnHandler)
+{
+    m_pfnWindowChanged = pfnHandler;
 }
 
 void Window::SetUserPointer(void* pUserPointer)

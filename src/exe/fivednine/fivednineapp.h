@@ -61,6 +61,11 @@ class fivednineApp
             fivednine::render::Window::KeyType keyType,
             void* pUserPointer);
 
+        static void
+        HandleWindowChanged(
+            fivednine::render::Window::WindowEvent windowEvent,
+            void* pUserPointer);
+
     private:
         bool                       m_isInitialized = false;
         fivednine::render::Window* m_pWindow = nullptr;

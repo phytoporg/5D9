@@ -17,6 +17,9 @@
 #include <protocol/messagewriter.h>
 
 #include <fivednine/render/window.h>
+//REMOVEME
+#include <SDL.h>
+//REMOVEME
 
 using json = nlohmann::json;
 using namespace fivednine;
@@ -128,6 +131,7 @@ bool fivednineApp::Initialize(const AppConfig& configuration, Window* pWindow)
 
     // TODO: Factor out all of the input goo
     m_pWindow->SetKeyStateChangedHandler(HandleKeypress);
+    m_pWindow->SetWindowStateChangedHandler(HandleWindowChanged);
     m_pWindow->SetUserPointer(this);
 
     // Connect to server
@@ -677,6 +681,60 @@ fivednineApp::HandleKeypress(
             default:
                 break;
         }
+    }
+}
+
+void
+fivednineApp::HandleWindowChanged(
+    Window::WindowEvent windowEvent,
+    void *pUserPointer)
+{
+    switch(windowEvent)
+    {
+        case Window::WindowEvent::Shown:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Shown");
+            break;
+        case Window::WindowEvent::Hidden:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Hidden");
+            break;
+        case Window::WindowEvent::Exposed:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Exposed");
+            break;
+        case Window::WindowEvent::Moved:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Moved");
+            break;
+        case Window::WindowEvent::Resized:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Resized");
+            break;
+        case Window::WindowEvent::SizeChanged:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::SizeChanged");
+            break;
+        case Window::WindowEvent::Minimized:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Minimized");
+            break;
+        case Window::WindowEvent::Maximized:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Maximized");
+            break;
+        case Window::WindowEvent::Restored:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Restored");
+            break;
+        case Window::WindowEvent::Enter:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Enter");
+            break;
+        case Window::WindowEvent::Leave:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Leave");
+            break;
+        case Window::WindowEvent::FocusGained:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::FocusGained");
+            break;
+        case Window::WindowEvent::FocusLost:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::FocusLost");
+            break;
+        case Window::WindowEvent::Close:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Close");
+            break;
+        default:
+            break;
     }
 }
 

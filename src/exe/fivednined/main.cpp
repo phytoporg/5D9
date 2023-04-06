@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     else if (pid > 0)
     {
         // Parent process
-        DaemonRunner runner(config);
+        DaemonRunner runner(config, pid);
         runner.Run();
     }
     else if (!SkipLaunch)

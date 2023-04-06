@@ -5,8 +5,12 @@
 
 #include <vector>
 #include <cstring>
+#include <cstdlib>
 
 #include <unistd.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 using namespace common;
 
@@ -38,8 +42,8 @@ namespace {
     }
 }
 
-DaemonRunner::DaemonRunner(const DaemonConfig& config)
-    : m_config(config)
+DaemonRunner::DaemonRunner(const DaemonConfig& config, pid_t launcherPid)
+    : m_config(config), m_launcherPid(launcherPid)
 {}
 
 void DaemonRunner::Run()
@@ -213,8 +217,32 @@ bool DaemonRunner::LaunchGame(protocol::LaunchMessage *pMessage)
     }
     else if (pid > 0)
     {
-        // Parent process
-        // TODO: Store the pid somewhere
+        // Parent process, store the PID
+        m_gamePid = pid;
+
+        // TODO: INFO
+        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Game PID = %d", m_gamePid);
+        if (kill(m_launcherPid, SIGSTOP) < 0)
+        {
+            RELEASE_LOGLINE_WARNING(LOG_DEFAULT, "Failed to stop launcher");
+        }
+        else
+        {
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Stopped launcher PID (%d)", m_launcherPid);
+        }
+
+        // TODO: wait on game pid to die
+        int status = 0;
+        waitpid(m_gamePid, &status, WUNTRACED);
+
+        if (kill(m_launcherPid, SIGCONT) < 0)
+        {
+            RELEASE_LOGLINE_WARNING(LOG_DEFAULT, "Failed to continue launcher");
+        }
+        else
+        {
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Continued launcher PID (%d)", m_launcherPid);
+        }
     }
     else
     {
