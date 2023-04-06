@@ -1,13 +1,13 @@
 #include "appconfig.h"
 
 #include <json/json.hpp>
-#include <fivednine/log/log.h>
+#include <common/log/log.h>
 
 #include <fstream>
 
 using json = nlohmann::json;
 
-using namespace fivednine;
+using namespace common;
 
 bool AppConfig::Parse(const std::string& configPath)
 {

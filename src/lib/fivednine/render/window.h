@@ -20,6 +20,7 @@ namespace fivednine { namespace render {
             Invalid,
             KeyDown,
             KeyUp,
+            WindowEvent,
             Quit
         };
 
@@ -31,7 +32,27 @@ namespace fivednine { namespace render {
             Right,
             A,
             D,
-            Q
+            Q,
+            Spacebar
+        };
+
+        enum class WindowEvent
+        {
+            Invalid = 0,
+            Shown,
+            Hidden,
+            Exposed,
+            Moved,
+            Resized,
+            SizeChanged,
+            Minimized,
+            Maximized,
+            Restored,
+            Enter,
+            Leave,
+            FocusGained,
+            FocusLost,
+            Close,
         };
 
         static constexpr uint32_t kDefaultWindowWidth = 1024;
@@ -53,10 +74,14 @@ namespace fivednine { namespace render {
         typedef void(*FnKeyStateChangedHandler)(EventType, KeyType, void*);
         void SetKeyStateChangedHandler(FnKeyStateChangedHandler pfnHandler);
 
+        typedef void(*FnWindowChangedHandler)(WindowEvent, void*);
+        void SetWindowStateChangedHandler(FnWindowChangedHandler pfnHandler);
+
         void SetUserPointer(void* pUserPointer);
 
     private:
         FnKeyStateChangedHandler m_pfnKeyStateChanged = nullptr;
+        FnWindowChangedHandler   m_pfnWindowChanged = nullptr;
         void*                    m_pUserPointer = nullptr;
 
         SDL_Window* m_pWindow = nullptr;

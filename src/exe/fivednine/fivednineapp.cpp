@@ -1,7 +1,6 @@
 #include "fivednineapp.h"
 #include "appconfig.h"
 
-#include <algorithm>
 #include <filesystem>
 #include <vector>
 #include <fstream>
@@ -11,9 +10,16 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <common/log/log.h>
+#include <common/log/check.h>
+
+#include <protocol/message.h>
+#include <protocol/messagewriter.h>
+
 #include <fivednine/render/window.h>
-#include <fivednine/log/log.h>
-#include <fivednine/log/check.h>
+//REMOVEME
+#include <SDL.h>
+//REMOVEME
 
 using json = nlohmann::json;
 using namespace fivednine;
@@ -63,6 +69,10 @@ namespace
         return true;
     }
 }
+
+fivednineApp::fivednineApp()
+    : m_clientSocket("/tmp/5D9d"), m_projectionMatrix(1.f)
+{}
 
 bool fivednineApp::Initialize(const AppConfig& configuration, Window* pWindow)
 {
@@ -121,7 +131,22 @@ bool fivednineApp::Initialize(const AppConfig& configuration, Window* pWindow)
 
     // TODO: Factor out all of the input goo
     m_pWindow->SetKeyStateChangedHandler(HandleKeypress);
+    m_pWindow->SetWindowStateChangedHandler(HandleWindowChanged);
     m_pWindow->SetUserPointer(this);
+
+    // Connect to server
+    // TODO: specify a timeout of some kind
+    if (!m_clientSocket.Connect())
+    {
+        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to connect to 5D9 daemon");
+        return false;
+    }
+
+    if (!SendGameInfoToDaemon())
+    {
+        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to send configure to 5D9 daemon");
+        return false;
+    }
 
     m_isInitialized = true;
     return true;
@@ -318,20 +343,30 @@ bool fivednineApp::LoadShaders(const AppConfig& configuration)
     return true;
 }
 
-bool fivednineApp::LoadGamesInfo(const AppConfig& configuration)
-{
-    const std::string& GamesDBPath = configuration.GetGamesDbPath();
-    if (!std::filesystem::exists(GamesDBPath))
-    {
+bool fivednineApp::LoadGamesInfo(const AppConfig& configuration) {
+    const std::string &GamesDBPath = configuration.GetGamesDbPath();
+    if (!std::filesystem::exists(GamesDBPath)) {
         RELEASE_LOGLINE_ERROR(
-            LOG_DEFAULT,
-            "Games database configuration path does not exist: %s",
-            GamesDBPath.c_str());
+                LOG_DEFAULT,
+                "Games database configuration path does not exist: %s",
+                GamesDBPath.c_str());
         return false;
     }
 
     std::ifstream gamesDbIn(GamesDBPath);
-    json gamesDbData = json::parse(gamesDbIn);
+
+    const bool AllowExceptions = false;
+    json gamesDbData = json::parse(gamesDbIn, nullptr, AllowExceptions);
+    if (gamesDbData.is_discarded())
+    {
+        // This json library requires use of exceptions to get diagnostic info :(
+        RELEASE_LOGLINE_ERROR(
+            LOG_DEFAULT,
+            "Json parse error for file: %s (no diagnostic information available)",
+            GamesDBPath.c_str());
+        return false;
+    }
+
     if (!gamesDbData.contains("games"))
     {
         RELEASE_LOGLINE_ERROR(
@@ -388,6 +423,17 @@ bool fivednineApp::LoadGamesInfo(const AppConfig& configuration)
         }
         gameInfo.TexturePrefix = gameEntry["texture_prefix"].get<std::string>();
 
+        if (!gameEntry.contains("command"))
+        {
+            RELEASE_LOGLINE_ERROR(
+                    LOG_DEFAULT,
+                    "Game DB entry %s is missing required field: 'command'",
+                    gameInfo.Title.c_str());
+            failedParseGames = true;
+            continue;
+        }
+        gameInfo.Command = gameEntry["command"].get<std::string>();
+
         m_gameInfoArray[m_numGameInfos] = gameInfo;
         ++m_numGameInfos;
     }
@@ -414,6 +460,40 @@ bool fivednineApp::LoadGamesInfo(const AppConfig& configuration)
     return true;
 }
 
+bool fivednineApp::SendGameInfoToDaemon()
+{
+    std::vector<protocol::GameConfiguration> configurations;
+    configurations.reserve(m_numGameInfos);
+    for (uint8_t i = 0; i < m_numGameInfos; ++i)
+    {
+        configurations.emplace_back( m_gameInfoArray[i].Title.c_str(), m_gameInfoArray[i].Command.c_str());
+    }
+
+    const protocol::ConfigureMessage ConfigureMessage(configurations.data(), m_numGameInfos);
+    protocol::WriterStream writerStream;
+    protocol::MessageWriter writer(&ConfigureMessage.Header, writerStream);
+
+    // Send entire message one chunk at a time if necessary (dictated by stream size)
+    while (writer.ChunksRemaining() > 0)
+    {
+        if (!writer.WriteNext())
+        {
+            break;
+        }
+
+        const ssize_t BytesSent = m_clientSocket.Write(reinterpret_cast<uint8_t*>(writerStream.Get()), writerStream.Tell());
+        if (BytesSent < 0)
+        {
+            break;
+        }
+
+        // Reset the stream to write and send the next chunk if needed
+        writerStream.Seek(0);
+    }
+
+    return writer.TotalBytesWritten() == ConfigureMessage.Header.MessageLen;
+}
+
 // API METHODS
 uint32_t fivednineApp::Selector_GetNumCards()
 {
@@ -431,9 +511,15 @@ uint32_t fivednineApp::Selector_GetSelectedIndex()
     return m_currentSelectedCardIndex;
 }
 
-void fivednineApp::Selector_ConfirmCurrentSelection()
+bool fivednineApp::Selector_ConfirmCurrentSelection()
 {
-    // TODO
+    if (!SendLaunchMessage())
+    {
+        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to send launch message to 5D9 daemon");
+        return false;
+    }
+
+    return true;
 }
 
 void fivednineApp::Selector_GetDisplayDimensions(uint32_t* pWidthOut, uint32_t* pHeightOut)
@@ -582,8 +668,87 @@ fivednineApp::HandleKeypress(
                 eventPump.PostEvent(event);
                 break;
             }
+            case Window::KeyType::Spacebar:
+            {
+                EventPump& eventPump = static_cast<fivednineApp*>(pUserPointer)->m_selectorEventPump;
+
+                SelectorEvent event;
+                event.EventType = SelectorEventType::Input;
+                event.EventPayload.InputEventPayload.InputEventType = SelectorInputEventType::ConfirmCurrent;
+                eventPump.PostEvent(event);
+                break;
+            }
             default:
                 break;
         }
     }
+}
+
+void
+fivednineApp::HandleWindowChanged(
+    Window::WindowEvent windowEvent,
+    void *pUserPointer)
+{
+    switch(windowEvent)
+    {
+        case Window::WindowEvent::Shown:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Shown");
+            break;
+        case Window::WindowEvent::Hidden:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Hidden");
+            break;
+        case Window::WindowEvent::Exposed:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Exposed");
+            break;
+        case Window::WindowEvent::Moved:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Moved");
+            break;
+        case Window::WindowEvent::Resized:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Resized");
+            break;
+        case Window::WindowEvent::SizeChanged:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::SizeChanged");
+            break;
+        case Window::WindowEvent::Minimized:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Minimized");
+            break;
+        case Window::WindowEvent::Maximized:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Maximized");
+            break;
+        case Window::WindowEvent::Restored:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Restored");
+            break;
+        case Window::WindowEvent::Enter:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Enter");
+            break;
+        case Window::WindowEvent::Leave:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Leave");
+            break;
+        case Window::WindowEvent::FocusGained:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::FocusGained");
+            break;
+        case Window::WindowEvent::FocusLost:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::FocusLost");
+            break;
+        case Window::WindowEvent::Close:
+            RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Window::WindowEvent::Close");
+            break;
+        default:
+            break;
+    }
+}
+
+bool fivednineApp::SendLaunchMessage()
+{
+    const char* pGameName = m_gameInfoArray[m_currentSelectedCardIndex].Title.c_str();
+    RELEASE_LOGLINE_INFO(LOG_DEFAULT, "Currently selected game = %s", pGameName);
+
+    protocol::LaunchMessage LaunchMessage(pGameName);
+    if (m_clientSocket.Write(reinterpret_cast<uint8_t*>(&LaunchMessage), sizeof(LaunchMessage)) < 0)
+    {
+        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to send launch message to 5D9d");
+        return false;
+    }
+
+    return true;
 }

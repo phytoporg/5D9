@@ -1,6 +1,6 @@
 #include "carouselselector.h"
 #include "fivednineapp.h"
-#include <fivednine/log/check.h>
+#include <common/log/check.h>
 
 CarouselSelector::CarouselSelector(fivednineApp* pApp, EventPump* pEventPump)
     : m_pApp(pApp), m_pEventPump(pEventPump)
@@ -90,8 +90,8 @@ void CarouselSelector::HandleInputEvent(const SelectorInputEventPayload& inputEv
 
                 MoveCameraToCard(NewSelectedIndex);
             }
-        }
             break;
+        }
         case SelectorInputEventType::PreviousSelection:
         {
             const uint32_t CurrentCardIndex = m_pApp->Selector_GetSelectedIndex();
@@ -105,11 +105,13 @@ void CarouselSelector::HandleInputEvent(const SelectorInputEventPayload& inputEv
 
                 MoveCameraToCard(NewSelectedIndex);
             }
+            break;
         }
-            break;
         case SelectorInputEventType::ConfirmCurrent:
-            // TODO
+        {
+            m_pApp->Selector_ConfirmCurrentSelection();
             break;
+        }
         default:
             break;
     }

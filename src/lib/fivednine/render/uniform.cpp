@@ -1,7 +1,7 @@
 #include "uniform.h"
 #include "rendercommon.h"
 
-#include <fivednine/log/log.h>
+#include <common/log/log.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>

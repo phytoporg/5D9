@@ -7,4 +7,5 @@ struct GameInfo
     std::string Title;
     std::string Alias;
     std::string TexturePrefix;
+    std::string Command;
 };

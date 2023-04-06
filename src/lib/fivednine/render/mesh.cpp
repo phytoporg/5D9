@@ -5,8 +5,9 @@
 #include "indexbuffer.h"
 #include "draw.h"
 
+#include <common/log/log.h>
+
 #include <fivednine/render/uniform.h>
-#include <fivednine/log/log.h>
 
 using namespace fivednine::render;
 

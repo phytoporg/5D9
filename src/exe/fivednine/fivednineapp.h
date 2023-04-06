@@ -17,10 +17,13 @@
 #include <fivednine/render/texturestorage.h>
 #include <fivednine/render/shaderstorage.h>
 
+#include <common/ipc/clientsocket.h>
+
 class AppConfig;
 class fivednineApp
 {
     public:
+        fivednineApp();
         bool Initialize(const AppConfig& configuration, fivednine::render::Window* pWindow);
 
         void Tick(float dtSeconds);
@@ -32,7 +35,7 @@ class fivednineApp
         uint32_t Selector_GetNumCards();
         void     Selector_SelectIndex(uint32_t index);
         uint32_t Selector_GetSelectedIndex();
-        void     Selector_ConfirmCurrentSelection();
+        bool     Selector_ConfirmCurrentSelection();
 
         void Selector_GetDisplayDimensions(uint32_t* pWidthOut, uint32_t* pHeightOut);
         bool Selector_GetCardGameInfo(uint32_t index, GameInfo* pGameInfoOut);
@@ -49,11 +52,18 @@ class fivednineApp
         bool LoadTextures(const AppConfig& configuration);
         bool LoadShaders(const AppConfig& configuration);
         bool LoadGamesInfo(const AppConfig& configuration);
+        bool SendGameInfoToDaemon();
+        bool SendLaunchMessage();
 
         static void 
         HandleKeypress(
             fivednine::render::Window::EventType eventType,
             fivednine::render::Window::KeyType keyType,
+            void* pUserPointer);
+
+        static void
+        HandleWindowChanged(
+            fivednine::render::Window::WindowEvent windowEvent,
             void* pUserPointer);
 
     private:
@@ -62,6 +72,8 @@ class fivednineApp
         fivednine::render::TextureStorage m_textureStorage;
         fivednine::render::ShaderStorage  m_shaderStorage;
         fivednine::render::Camera         m_camera;
+
+        common::ipc::ClientSocket         m_clientSocket;
 
         glm::mat4 m_projectionMatrix;
 

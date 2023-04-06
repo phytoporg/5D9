@@ -1,14 +1,17 @@
 #include "fivednineapp.h"
 #include "appconfig.h"
 
-#include <fivednine/cli/cliargumentparser.h>
-#include <fivednine/log/log.h>
+#include <common/cli/cliargumentparser.h>
+#include <common/log/log.h>
+
 #include <fivednine/render/window.h>
 #include <fivednine/render/color.h>
 #include <fivednine/system/time.h>
 
+using namespace common;
+using namespace common::cli;
+
 using namespace fivednine;
-using namespace fivednine::cli;
 using namespace fivednine::render;
 using namespace fivednine::system;
 
@@ -18,16 +21,18 @@ int main(int argc, char** argv)
 {
     // Initialize logging
     log::SetLogVerbosity(log::LogVerbosity::Warning);
-    log::EnableZone(LOG_DEFAULT);
-    log::EnableZone(LOG_RENDER);
-    log::EnableZone(LOG_API);
+    log::SetLogFile("/tmp/log.txt");
+
+    log::RegisterLogZone(LOG_DEFAULT, true, "Default");
+    log::RegisterLogZone(LOG_RENDER, true, "Render");
+    log::RegisterLogZone(LOG_API, true, "API");
 
     cli::CommandLineArgumentParser argumentParser(argc, argv);
     const cli::CommandLineArgument* pConfigPathArgument = argumentParser.FindArgument("config");
     if (!pConfigPathArgument)
     {
         // TODO: fall back to a reasonable default
-        RELEASE_LOG_ERROR(LOG_DEFAULT, "Required argument: --config");
+        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Required argument: --config");
         return -1;
     }
 
@@ -38,7 +43,11 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    Window window("shotOS game selection carousel");
+    Window window(
+        "shotOS game selection carousel",
+        Window::kDefaultWindowWidth,
+        Window::kDefaultWindowHeight,
+        true);
     fivednineApp app;
     if (!app.Initialize(appConfig, &window))
     {
