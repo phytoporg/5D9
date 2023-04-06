@@ -101,7 +101,6 @@ void common::log::LogLine(LogZone zone, LogVerbosity verbosity, const char* pFor
     va_list args;
     va_start(args, pFormatString);
     vsnprintf(formatted, sizeof(formatted), pFormatString, args);
-    perror(formatted);
     va_end(args);
 
     fprintf(s_pFile, "[%s] %s\n", ZoneToString(zone), formatted);
@@ -119,7 +118,6 @@ void common::log::Log(LogZone zone, LogVerbosity verbosity, const char* pFormatS
     va_list args;
     va_start(args, pFormatString);
     vsnprintf(formatted, sizeof(formatted), pFormatString, args);
-    perror(formatted);
     va_end(args);
 
     fprintf(s_pFile, "[%s] %s", ZoneToString(zone), formatted);
@@ -132,7 +130,6 @@ void common::log::LogAndFail(LogZone zone, const char* pFormatString, ...)
     va_list args;
     va_start(args, pFormatString);
     vsnprintf(formatted, sizeof(formatted), pFormatString, args);
-    perror(formatted);
     va_end(args);
 
     fprintf(s_pFile, "[%s] %s", ZoneToString(zone), formatted);
@@ -147,7 +144,6 @@ void common::log::LogLineAndFail(LogZone zone, const char* pFormatString, ...)
     va_list args;
     va_start(args, pFormatString);
     vsnprintf(formatted, sizeof(formatted), pFormatString, args);
-    perror(formatted);
     va_end(args);
 
     fprintf(s_pFile, "[%s] %s\n", ZoneToString(zone), formatted);

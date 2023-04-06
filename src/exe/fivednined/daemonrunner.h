@@ -18,4 +18,6 @@ private:
 
     std::vector<LaunchInfo> m_launchInfo;
     const DaemonConfig& m_config;
+
+    bool LaunchGame(protocol::LaunchMessage *pMessage);
 };

@@ -507,9 +507,15 @@ uint32_t fivednineApp::Selector_GetSelectedIndex()
     return m_currentSelectedCardIndex;
 }
 
-void fivednineApp::Selector_ConfirmCurrentSelection()
+bool fivednineApp::Selector_ConfirmCurrentSelection()
 {
-    // TODO
+    if (!SendLaunchMessage())
+    {
+        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to send launch message to 5D9 daemon");
+        return false;
+    }
+
+    return true;
 }
 
 void fivednineApp::Selector_GetDisplayDimensions(uint32_t* pWidthOut, uint32_t* pHeightOut)
@@ -658,8 +664,33 @@ fivednineApp::HandleKeypress(
                 eventPump.PostEvent(event);
                 break;
             }
+            case Window::KeyType::Spacebar:
+            {
+                EventPump& eventPump = static_cast<fivednineApp*>(pUserPointer)->m_selectorEventPump;
+
+                SelectorEvent event;
+                event.EventType = SelectorEventType::Input;
+                event.EventPayload.InputEventPayload.InputEventType = SelectorInputEventType::ConfirmCurrent;
+                eventPump.PostEvent(event);
+                break;
+            }
             default:
                 break;
         }
     }
+}
+
+bool fivednineApp::SendLaunchMessage()
+{
+    const char* pGameName = m_gameInfoArray[m_currentSelectedCardIndex].Title.c_str();
+    RELEASE_LOGLINE_INFO(LOG_DEFAULT, "Currently selected game = %s", pGameName);
+
+    protocol::LaunchMessage LaunchMessage(pGameName);
+    if (m_clientSocket.Write(reinterpret_cast<uint8_t*>(&LaunchMessage), sizeof(LaunchMessage)) < 0)
+    {
+        RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to send launch message to 5D9d");
+        return false;
+    }
+
+    return true;
 }

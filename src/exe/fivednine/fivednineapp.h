@@ -35,7 +35,7 @@ class fivednineApp
         uint32_t Selector_GetNumCards();
         void     Selector_SelectIndex(uint32_t index);
         uint32_t Selector_GetSelectedIndex();
-        void     Selector_ConfirmCurrentSelection();
+        bool     Selector_ConfirmCurrentSelection();
 
         void Selector_GetDisplayDimensions(uint32_t* pWidthOut, uint32_t* pHeightOut);
         bool Selector_GetCardGameInfo(uint32_t index, GameInfo* pGameInfoOut);
@@ -53,6 +53,7 @@ class fivednineApp
         bool LoadShaders(const AppConfig& configuration);
         bool LoadGamesInfo(const AppConfig& configuration);
         bool SendGameInfoToDaemon();
+        bool SendLaunchMessage();
 
         static void 
         HandleKeypress(

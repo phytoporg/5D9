@@ -33,4 +33,6 @@ ConfigureMessage::ConfigureMessage(GameConfiguration* pConfigurations, uint8_t c
 
 LaunchMessage::LaunchMessage(const char *pGameName)
     : Header(MessageType::Launch, sizeof(LaunchMessage))
-{}
+{
+    strncpy(Name, pGameName, sizeof(Name));
+}

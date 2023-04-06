@@ -4,6 +4,9 @@
 #include <common/log/log.h>
 
 #include <vector>
+#include <cstring>
+
+#include <unistd.h>
 
 using namespace common;
 
@@ -15,7 +18,7 @@ namespace {
         {
             return true;
         }
-        else if (totalBytesRead < 0)
+        else if (totalBytesRead <= 0)
         {
             return false;
         }
@@ -47,36 +50,34 @@ void DaemonRunner::Run()
         return;
     }
 
-    while(true)
+    while(serverSocket.Listen())
     {
-        if (serverSocket.Listen())
+        int clientFd;
+        if (serverSocket.Accept(&clientFd))
         {
-            int clientFd;
-            if (serverSocket.Accept(&clientFd))
+            while (true)
             {
-                // Read the message header
                 const size_t HeaderSize = sizeof(protocol::MessageHeader);
                 std::vector<uint8_t> messageBuffer(HeaderSize, 0);
 
+                // Read message header
                 if (!ReadUntil(serverSocket,
                                clientFd,
                                messageBuffer.data(),
-                               HeaderSize))
-                {
+                               HeaderSize)) {
                     RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to read message header");
                     serverSocket.Close(clientFd);
-                    continue;
+                    break;
                 }
 
                 // Check message header integrity
-                auto pMessageHeader = reinterpret_cast<protocol::MessageHeader*>(messageBuffer.data());
-                if (pMessageHeader->Magic != protocol::kMessageMagic)
-                {
+                auto pMessageHeader = reinterpret_cast<protocol::MessageHeader *>(messageBuffer.data());
+                if (pMessageHeader->Magic != protocol::kMessageMagic) {
                     RELEASE_LOGLINE_ERROR(
                         LOG_DEFAULT,
                         "Failed to read message header: unexpected magic value");
                     serverSocket.Close(clientFd);
-                    continue;
+                    break;
                 }
 
                 // Read the remainder of the message
@@ -85,46 +86,44 @@ void DaemonRunner::Run()
                 messageBuffer.resize(MessageLength);
 
                 // In case resizing causes a reallocation, update pMessageHeader
-                pMessageHeader = reinterpret_cast<protocol::MessageHeader*>(messageBuffer.data());
+                pMessageHeader = reinterpret_cast<protocol::MessageHeader *>(messageBuffer.data());
                 if (!ReadUntil(serverSocket,
                                clientFd,
                                messageBuffer.data() + HeaderSize,
-                               MessageLength - HeaderSize))
-                {
+                               MessageLength - HeaderSize)) {
                     RELEASE_LOGLINE_ERROR(LOG_DEFAULT, "Failed to read message data");
                     serverSocket.Close(clientFd);
-                    continue;
+                    break;
                 }
 
                 switch (MessageType)
                 {
                     case protocol::MessageType::Configure:
-                        if (!HandleConfigurationMessage(pMessageHeader))
-                        {
+                        if (!HandleConfigurationMessage(pMessageHeader)) {
                             RELEASE_LOGLINE_ERROR(
                                 LOG_DEFAULT,
                                 "Failed to handle configuration message.");
                         }
                         break;
                     case protocol::MessageType::Launch:
-                        if (!HandleLaunchMessage(pMessageHeader))
-                        {
+                        if (!HandleLaunchMessage(pMessageHeader)) {
                             RELEASE_LOGLINE_ERROR(
                                 LOG_DEFAULT,
                                 "Failed to handle launch message.");
                         }
                         break;
                     default:
-                        RELEASE_LOGLINE_ERROR(
-                            LOG_DEFAULT,
-                            "Received unexpected message type: %d",
-                            pMessageHeader->Type);
+                    RELEASE_LOGLINE_ERROR(
+                        LOG_DEFAULT,
+                        "Received unexpected message type: %d",
+                        pMessageHeader->Type);
                         break;
                 }
             }
-            serverSocket.Close(clientFd);
-            RELEASE_LOGLINE_INFO(LOG_DEFAULT, "Socket closed for client handle %d", clientFd);
         }
+
+        serverSocket.Close(clientFd);
+        RELEASE_LOGLINE_INFO(LOG_DEFAULT, "Socket closed for client handle %d", clientFd);
     }
 }
 
@@ -172,7 +171,78 @@ bool DaemonRunner::HandleConfigurationMessage(protocol::MessageHeader *pHeader)
 
 bool DaemonRunner::HandleLaunchMessage(protocol::MessageHeader *pHeader)
 {
-    // TODO
-    return false;
+    RELEASE_LOGLINE_INFO(LOG_DEFAULT, "Received Launch message.");
+
+    auto pLaunchMessage = reinterpret_cast<protocol::LaunchMessage*>(pHeader);
+    if (!LaunchGame(pLaunchMessage))
+    {
+        RELEASE_LOGLINE_ERROR(
+            LOG_DEFAULT, "Failed to launch process: %s",
+            pLaunchMessage->Name);
+        return false;
+    }
+
+    return true;
 }
 
+bool DaemonRunner::LaunchGame(protocol::LaunchMessage *pMessage)
+{
+    auto it =
+    std::find_if(std::begin(m_launchInfo), std::end(m_launchInfo),
+    [pMessage](const LaunchInfo& info) -> bool {
+        return info.Name == pMessage->Name;
+    });
+    if (it == std::end(m_launchInfo))
+    {
+        RELEASE_LOGLINE_ERROR(
+            LOG_DEFAULT,
+            "Could not find matching configuration for %s",
+            pMessage->Name);
+        return false;
+    }
+
+    const char* pCommand = it->Command.c_str();
+    pid_t pid;
+    if ((pid = fork()) < 0)
+    {
+        RELEASE_LOGLINE_ERROR(
+            LOG_DEFAULT,
+            "Fork failed when launching %s",
+            pMessage->Name);
+        return false;
+    }
+    else if (pid > 0)
+    {
+        // Parent process
+        // TODO: Store the pid somewhere
+    }
+    else
+    {
+        std::vector<char*> tokens;
+        char* token = std::strtok(const_cast<char*>(pCommand), " ");
+        while (token)
+        {
+            tokens.push_back(token);
+            token = std::strtok(nullptr, " ");
+        }
+
+        if (tokens.empty())
+        {
+            RELEASE_LOGLINE_ERROR(
+                LOG_DEFAULT, "Cannot launch %s: command is empty",
+                pMessage->Name);
+            return false;
+        }
+        tokens.push_back(nullptr);
+
+        if (execv(tokens[0], &tokens[0]) < 0)
+        {
+            RELEASE_LOGLINE_ERROR(
+                LOG_DEFAULT, "Failed to execute command: %s",
+                pCommand);
+            exit(-1);
+        }
+    }
+
+    return true;
+}

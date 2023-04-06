@@ -41,6 +41,8 @@ namespace
                 return Window::KeyType::Left;
             case SDLK_RIGHT:
                 return Window::KeyType::Right;
+            case SDLK_SPACE:
+                return Window::KeyType::Spacebar;
             default:
                 return Window::KeyType::Invalid;
         }

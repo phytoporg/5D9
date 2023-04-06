@@ -31,7 +31,8 @@ namespace fivednine { namespace render {
             Right,
             A,
             D,
-            Q
+            Q,
+            Spacebar
         };
 
         static constexpr uint32_t kDefaultWindowWidth = 1024;
